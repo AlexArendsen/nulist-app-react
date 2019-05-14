@@ -1,0 +1,1 @@
+export const FormStates = { Ready: 'S_READY', Submitting: 'S_SUBMITTING' }
