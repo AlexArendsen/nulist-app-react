@@ -1,5 +1,14 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## TODO
+
+* ~~Connect React Router~~
+* ~~Items can be checked~~
+* Items can be added
+* ~~Selected item details~~
+* ~~Some kind of UI~~
+* Markdown display
+
 ## Available Scripts
 
 In the project directory, you can run:

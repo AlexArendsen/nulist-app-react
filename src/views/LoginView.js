@@ -1,9 +1,10 @@
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
-import { Views } from '../values/view';
 import InitView from './InitView';
 import { login } from '../redux/actions/authenticationActions';
 import { FormStates } from '../values/form-states';
+import { Routes } from '../values/routes';
+import { Storage } from '../values/storage';
 
 class LoginView extends Component {
 
@@ -12,8 +13,14 @@ class LoginView extends Component {
         password: this.props.password,
     }
 
-    handleSubmit = () => {
-        this.props.dispatch(login(this.state.username, this.state.password))
+    componentDidMount() {
+        // Skip past login if we already know the user
+        if (!!localStorage.getItem(Storage.UserTokenKey)) this.props.history.push(Routes.Items())
+    }
+
+    handleSubmit = async () => {
+        var success = await this.props.dispatch(login(this.state.username, this.state.password))
+        if (success) this.props.history.push(Routes.Items());
     }
 
     render() {
@@ -43,8 +50,7 @@ class LoginView extends Component {
 export default connect((state, props) => {
     return {
         status: (state.login || {}).status,
-        username: (state.login || {}).username,
-        password: (state.login || {}).password,
-        userToken: state.userToken
+        userToken: state.userToken,
+        history: props.history
     }
 })(LoginView)

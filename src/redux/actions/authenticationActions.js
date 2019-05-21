@@ -12,9 +12,10 @@ export const login = (username, password, confirmPassword) => {
             const response = await fetch(Urls.Login(), { method: 'POST', body: body, headers: MakeDefaultHeaders() })
             if (!response.ok) throw await response.text();
             const result = await response.json();
-            dispatch({ type: Actions.ReceiveLogin, data: result.token })
+
             console.log('Setting localStorage to', result.token)
             localStorage.setItem(Storage.UserTokenKey, result.token)
+            dispatch({ type: Actions.ReceiveLogin, data: result.token })
         } catch (e) {
             dispatch({ type: Actions.WebRequestFailed, data: e, error: e.toString() })
         }

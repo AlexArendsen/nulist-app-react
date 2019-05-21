@@ -11,21 +11,80 @@ import { MakeDefaultHeaders } from "../../values/headers";
 // user_id: "5b82f656c84c100f860835fd"
 // _id: "5cc0ef59352498006b89fcb4"
 
-export const getAllItems = () => {
-    return async (dispatch) => {
-        dispatch({ type: Actions.SendGetAllItems })
+// Add in by app
+// saving: bool
+// descendents: number
+// completed: number
 
-        try {
-            const response = await fetch(Urls.Item.GetAll(), { headers: MakeDefaultHeaders() })
-            if (!response.ok) throw await response.text();
-            const result = await response.json();
-            dispatch({ type: Actions.ReceiveGetAllItems, data: result })
-        } catch (e) {
-            dispatch({ type: Actions.WebRequestFailed, data: e, error: e + "" })
-        }
+const Send = async (verb, dispatch, url, successAction = undefined, body = {}, failureAction = Actions.WebRequestFailed) => {
+    const options = {
+        headers: MakeDefaultHeaders(),
+        method: verb
+    }
+    if (verb !== 'GET') options.body = (typeof(body) === 'string') ? body : JSON.stringify(body);
+    try {
+        const response = await fetch(url, options)
+        if (!response.ok) throw await response.text();
+        const result = await response.json();
+        if (!!successAction) dispatch({ type: successAction, data: result })
+        return result
+    } catch(e) {
+        console.error(e)
+        dispatch({ type: failureAction, data: e, error: e + "" })
     }
 }
 
-export const selectItem = (itemId) => ({ type: Actions.SelectItem, data: itemId })
+const Get = async (dispatch, url, successAction, body = '', failureAction = Actions.WebRequestFailed) => Send('GET', dispatch, url, successAction, body, failureAction);
+const Post = async (dispatch, url, successAction, body = '', failureAction = Actions.WebRequestFailed) => Send('POST', dispatch, url, successAction, body, failureAction);
+const Put = async (dispatch, url, successAction, body = '', failureAction = Actions.WebRequestFailed) => Send('PUT', dispatch, url, successAction, body, failureAction);
+const Delete = async (dispatch, url, successAction, body = '', failureAction = Actions.WebRequestFailed) => Send('DELETE', dispatch, url, successAction, body, failureAction);
 
-export const goUp = () => ({ type: Actions.GoUp })
+let NewItemIdSalt = 0
+
+export const getAllItems = () => {
+    return async (dispatch) => {
+        dispatch({ type: Actions.SendGetAllItems })
+        await Get(dispatch, Urls.Item.GetAll(), Actions.ReceiveGetAllItems);
+    }
+}
+
+export const checkItem = (itemId) => {
+    return async (dispatch) => {
+        dispatch({ type: Actions.SendCheckItem, data: itemId })
+        await Put(dispatch, Urls.Item.Check(itemId), Actions.ReceiveCheckItem)
+    }
+}
+
+export const uncheckItem = (itemId) => {
+    return async (dispatch) => {
+        dispatch({ type: Actions.SendUncheckItem, data: itemId })
+        await Put(dispatch, Urls.Item.Uncheck(itemId), Actions.ReceiveUncheckItem)
+    }
+}
+
+export const deleteItem = (itemId) => {
+    return async (dispatch) => {
+        dispatch({ type: Actions.SendDeleteItem, data: itemId })
+        await Delete(dispatch, Urls.Item.Delete(itemId), Actions.ReceiveDeleteItem)
+    }
+}
+
+export const updateItem = (item) => {
+    return async (dispatch) => {
+        dispatch({ type: Actions.SendUpdateItem, data: item._id })
+        await Put(dispatch, Urls.Item.Update(item._id), Actions.ReceiveUpdateItem, item)
+    }
+}
+
+export const addItem = (title, parent_id) => {
+    return async (dispatch) => {
+
+        const tmpId = `tmp_${new Date().getTime()}-${++NewItemIdSalt}`
+        const newItem = { title: title, parent_id, _id: tmpId }
+
+        dispatch({ type: Actions.SendCreateItem, data: newItem })
+        const result = await Post(dispatch, Urls.Item.Create(), undefined, newItem)
+
+        dispatch({ type: Actions.ReceiveCreateItem, data: result, tmpId: tmpId })
+    }
+}
