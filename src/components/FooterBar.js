@@ -1,19 +1,14 @@
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
-import { Grid, Typography } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
+import ResponsiveGrid from './ResponsiveGrid';
 
 class FooterBar extends Component {
     render() {
         return (
-            <div>
-                <Grid container style={{ padding: '32px 0' }}>
-                    <Grid item { ...this.props.config.layout.gutterWidths } />
-                    <Grid item { ...this.props.config.layout.centerWidths } >
-                        <Typography variant="h3">NuList</Typography>
-                    </Grid>
-                    <Grid item { ...this.props.config.layout.gutterWidths } />
-                </Grid>
-            </div>
+            <ResponsiveGrid style={{ padding: '32px 0' }}>
+                <Typography variant="h3">NuList</Typography>
+            </ResponsiveGrid>
         )
     }
 }

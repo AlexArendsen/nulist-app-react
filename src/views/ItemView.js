@@ -1,16 +1,17 @@
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { Views } from '../values/view';
+import { withRouter } from 'react-router';
 import InitView from './InitView';
 import { getAllItems, selectItem, goUp, addItem, uncheckItem, checkItem } from '../redux/actions/itemActions';
 import { Link } from 'react-router-dom';
 import { Routes } from '../values/routes';
-import Item from '../components/Item';
 import { Typography, List, ListItem, Grid, ListItemText, ListItemSecondaryAction, Checkbox, Card, CardContent, TextField, Button, LinearProgress, Paper } from '@material-ui/core';
 import { DataStates } from '../values/data-states';
 import ItemBreadcrumbTrail from '../components/ItemBreadcrumbTrail';
 import ItemList from '../components/ItemList';
 import ItemDetailsCard from '../components/ItemDetailsCard';
+import { loadProfileInfo } from '../redux/actions/profileActions';
 
 class ItemView extends Component {
 
@@ -24,23 +25,16 @@ class ItemView extends Component {
         this.props.history.push(this.props.item.parent_id ? Routes.Item(this.props.item.parent_id) : Routes.Items())
     }
 
+    handleItemClick = (item) => { this.props.history.push(Routes.Item(item._id)) }
+
     handleAddItem = () => {
         this.props.dispatch(addItem(this.state.newItemName, (this.props.item || {_id: null})._id))
         this.setState({ newItemName: '' })
     }
 
-    render() {
+    goHome = () => { this.props.history.push(Routes.Items()); }
 
-        /*const itemHeader = (this.props.item)
-            ? (
-                <Card>
-                    <CardContent>
-                        <Typography variant="h5">{ this.props.item.title }</Typography>
-                        <Typography variant="body1">{ this.props.item.description }</Typography>
-                    </CardContent>
-                </Card>
-            ) : undefined;
-            */
+    render() {
 
         const itemForm = (
             <form action="javascript:void(0)" style={{ width: '100%', padding: '8px 0' }}>
@@ -82,14 +76,14 @@ class ItemView extends Component {
                         </Fragment>
                     ) }
 
-                    <ItemBreadcrumbTrail item={ this.props.item } />
+                    <ItemBreadcrumbTrail item={ this.props.item } onItemClick={ this.handleItemClick } onHomeClick={ this.goHome } />
                 </div>
 
                 { ( this.props.item ) ? (<ItemDetailsCard item={ this.props.item } />) : undefined }
 
                 <Paper style={{ marginTop: '32px' }}>
                     { itemForm }
-                    <ItemList items={ this.props.children } />
+                    <ItemList items={ this.props.children } onItemClick={ this.handleItemClick } />
                 </Paper>
 
             </Fragment>
@@ -103,7 +97,8 @@ export default connect((state, props) => {
     const items = m(state.items).filter ? state.items : [];
     return {
         itemsLoaded: state.items !== DataStates.Unloaded,
+        profileUnloaded: state.profile === DataStates.Unloaded,
         item: (items.filter(i => i._id === itemId) || [null])[0],
         children: items.filter(i => i.parent_id === itemId).slice().sort((a, b) => (a.index - b.index))
     }
-})(ItemView)
+})(withRouter(ItemView))

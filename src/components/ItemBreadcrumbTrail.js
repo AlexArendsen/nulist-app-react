@@ -9,9 +9,9 @@ class ItemBreadcrumbTrail extends Component {
 
     parentsLookup = null
 
-    handleClick = (item) => { this.props.history.push(Routes.Item(item._id)); }
+    handleClick = (item) => { this.props.onItemClick(item); }
 
-    handleGoHome = () => { this.props.history.push(Routes.Items()) }
+    handleGoHome = () => { this.props.onHomeClick(); }
 
     render() {
 
@@ -52,6 +52,8 @@ class ItemBreadcrumbTrail extends Component {
 export default connect((state, props) => {
     return {
         current: props.item,
-        items: state.items
+        items: state.items,
+        onItemClick: props.onItemClick,
+        onHomeClick: props.onHomeClick
     }
 })(withRouter(ItemBreadcrumbTrail))

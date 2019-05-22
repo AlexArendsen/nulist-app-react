@@ -10,18 +10,13 @@ export const Urls = {
     Item: {
         GetAll: () => `${baseUrl}/items`,
         Create: () => `${baseUrl}/item`,
+        Move: () => `${baseUrl}/item`,
         Update: () => `${baseUrl}/item`,
         Delete: (itemId) => `${baseUrl}/item/${itemId}`,
         Check: (itemId) => `${baseUrl}/item/${itemId}/check`,
         Uncheck: (itemId) => `${baseUrl}/item/${itemId}/uncheck`,
+    },
+    Profile: {
+        Me: () => `${baseUrl}/me`
     }
 }
-
-// Auth / Reg
-export const LoginUrl = () => `${baseUrl}/login`;
-export const LogoutUrl = () => `${baseUrl}/logout`;
-export const RegisterUrl = () => `${baseUrl}/register`;
-
-// Items
-export const AllItemsUrl = () => `${baseUrl}/items`;
-export const CreateItemUrl = () => `${baseUrl}/login`;

@@ -43,8 +43,16 @@ let NewItemIdSalt = 0
 
 export const getAllItems = () => {
     return async (dispatch) => {
+        const tmpKey = 'nulist-temp-item-list'
+        const bypass = true
+        if (!bypass && localStorage.getItem(tmpKey)) {
+            const items = JSON.parse(localStorage.getItem(tmpKey))
+            dispatch({ type: Actions.ReceiveGetAllItems, data: items})
+            return
+        }
         dispatch({ type: Actions.SendGetAllItems })
-        await Get(dispatch, Urls.Item.GetAll(), Actions.ReceiveGetAllItems);
+        const result = await Get(dispatch, Urls.Item.GetAll(), Actions.ReceiveGetAllItems);
+        localStorage.setItem(tmpKey, JSON.stringify(result))
     }
 }
 
@@ -66,6 +74,13 @@ export const deleteItem = (itemId) => {
     return async (dispatch) => {
         dispatch({ type: Actions.SendDeleteItem, data: itemId })
         await Delete(dispatch, Urls.Item.Delete(itemId), Actions.ReceiveDeleteItem)
+    }
+}
+
+export const moveItem = (item, newParentId) => {
+    return async (dispatch) => {
+        dispatch({ type: Actions.SendMoveItem, data: item._id })
+        await Put(dispatch, Urls.Item.Move(item._id), Actions.ReceiveMoveItem, { ...item, parent_id: newParentId })
     }
 }
 

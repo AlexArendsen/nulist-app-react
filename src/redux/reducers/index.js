@@ -7,6 +7,7 @@ const defaultState = {
     items: DataStates.Unloaded,
     selectedItem: null,
     login: { status: FormStates.Ready },
+    profile: DataStates.Unloaded,
     userToken: localStorage.getItem(Storage.UserTokenKey)
 }
 
@@ -23,11 +24,13 @@ const reducers = {
 
     [Actions.Logout]: (state, action) => ({ ...state, userToken: null }),
 
+    [Actions.SendGetAllItems]: (state, actions) => ({ ...state, items: DataStates.Loading }),
     [Actions.ReceiveGetAllItems]: (state, action) => {
         const casted = withStats(action.data).map((i, idx) => ({
             ...i,
             index: idx,
             saving: false,
+            expanded: false,
             created_at: i.created_at ? new Date(i.created_at) : undefined
         }))
 
@@ -48,8 +51,18 @@ const reducers = {
     [Actions.SendDeleteItem]: (state, action) => updateItem(state, action.data, { saving: true }),
     [Actions.ReceiveDeleteItem]: (state, action) => removeItem(state, action.data),
 
+    [Actions.SendMoveItem]: (state, action) => updateItem(state, action.data, { saving: true }),
+    [Actions.ReceiveMoveItem]: (state, action) => updateItem(state, action.data._id, { ...action.data, saving: false }),
+
     [Actions.SendUpdateItem]: (state, action) => updateItem(state, action.data, { saving: true }),
     [Actions.ReceiveUpdateItem]: (state, action) => updateItem(state, action.data._id, { ...action.data, saving: false }),
+
+    [Actions.SendGetProfile]: (state, action) => ({ ...state, profile: DataStates.Loading }),
+    [Actions.ReceiveGetProfile]: (state, action) => ({ ...state, profile: action.data }),
+
+    [Actions.ExpandItem]: (state, action) => updateItem(state, action.data._id, { expanded: true }),
+    [Actions.CollapseItem]: (state, action) => updateItem(state, action.data._id, { expanded: false })
+
 }
 
 const updateItem = (state, id, item) => ({
@@ -100,9 +113,7 @@ const withStats = (items = []) => {
         console.log(`Calculated stats for ${items.length} items in ${end.getTime() - start.getTime()}ms`);
 
         return out
-    } catch (e) {
-        debugger
-    }
+    } catch (e) { }
 
 }
 

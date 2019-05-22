@@ -11,8 +11,11 @@ export const Actions = {
     SendDeleteItem: 'SEND_DELETE_ITEM', ReceiveDeleteItem: 'RECV_DELETE_ITEM',
     SendCheckItem: 'SEND_CHECK_ITEM', ReceiveCheckItem: 'RECV_CHECK_ITEM',
     SendUncheckItem: 'SEND_UNCHECK_ITEM', ReceiveUncheckItem: 'RECV_UNCHECK_ITEM',
+    SendGetProfile: 'SEND_GET_PROFILE', ReceiveGetProfile: 'RECV_GET_PROFILE',
     Logout: 'LOGOUT',
     WebRequestFailed: 'WEB_OOPS',
+
+    ExpandItem: 'ITEM_EXPAND', CollapseItem: 'ITEM_COLLAPSE',
 
     SelectItem: 'SELECT_ITEM',
     GoUp: 'UP'
