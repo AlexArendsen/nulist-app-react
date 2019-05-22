@@ -58,7 +58,7 @@ class ItemDetailsCard extends Component {
     editOrSave = () => {
         if (this.state.mode === Modes.Editing) {
             const changedFields = Object.keys(this.state.fields)
-                .filter(k => !!this.state.fields[k])
+                .filter(k => this.state.fields[k] !== undefined)
                 .reduce((obj, next) => ({ ...obj, [next]: this.state.fields[next] }), {})
             this.props.dispatch(updateItem({ ...this.props.item, ...changedFields }))
         }
@@ -79,18 +79,6 @@ class ItemDetailsCard extends Component {
                 onClick={onClick}>
                 {title}
             </Button>)
-
-        const content = (this.state.mode == Modes.Viewing) ? (<MaterialMarkdown source={this.props.item.description} />)
-            : (
-                <TextField
-                    onChange={e => this.setState({ fields: { ...this.state.fields, description: e.target.value } })}
-                    defaultValue={this.props.item.description}
-                    label="Description"
-                    variant="outlined"
-                    rows="12"
-                    fullWidth
-                    multiline />
-            )
 
         const moveDialog = (
             <Dialog open={this.state.showMoveDialog}>
@@ -129,11 +117,37 @@ class ItemDetailsCard extends Component {
             </Dialog>
         )
 
-        const createdTime = (isValidDate(this.props.item.created_at))
+        const isValidDate = (date) => !!date && typeof(date.getTime) === 'function' && !isNaN(date.getTime())
+        const createdTime = (!isValidDate(this.props.item.created_at))
             ? null : (
                 <Typography variant="caption">
-                    { format(this.props.item.created_at, 'D MMM YYYY, hh:mm:ss a') } (<TimeAgo date={ this.props.item.created_at } />)
+                    { format(new Date(this.props.item.created_at), 'D MMM YYYY, hh:mm:ss a') } (<TimeAgo date={ this.props.item.created_at } />)
                 </Typography>
+            )
+
+        const editableContent = (this.state.mode == Modes.Viewing)
+            ? (
+                <Fragment>
+                    <Typography variant="h5" gutterBottom>{this.props.item.title}</Typography>
+                    <MaterialMarkdown source={this.props.item.description} />
+                </Fragment>
+            ) : (
+                <Fragment>
+                    <TextField onChange={ e => this.setState({ fields: { ...this.state.fields, title: e.target.value } }) }
+                        defaultValue={ this.props.item.title }
+                        label="Title"
+                        variant="outlined"
+                        style={{ marginBottom: '16px' }}
+                        fullWidth />
+                    <TextField
+                        onChange={e => this.setState({ fields: { ...this.state.fields, description: e.target.value } })}
+                        defaultValue={this.props.item.description}
+                        label="Description"
+                        variant="outlined"
+                        rows="12"
+                        fullWidth
+                        multiline />
+                </Fragment>
             )
 
         return (
@@ -144,8 +158,7 @@ class ItemDetailsCard extends Component {
 
                 <Card>
                     <CardContent>
-                        <Typography variant="h5" gutterBottom>{this.props.item.title}</Typography>
-                        {content}
+                        {editableContent}
                         {createdTime}
                     </CardContent>
                     <CardActions>

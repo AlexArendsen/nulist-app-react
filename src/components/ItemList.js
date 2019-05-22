@@ -38,11 +38,10 @@ class ItemList extends Component {
         )
 
         const result = () => {
-            if (this.props.items && !this.props.items.length) return noItems()
             switch (this.props.items) {
                 case DataStates.Unloaded: return null;
                 case DataStates.Loading: return noItems('Loading...');
-                default: return (
+                default: return (!this.props.items.length) ? noItems() : (
                     <List>
                         { this.props.items.map(c => (
                             <ListItem key={ c._id } button={ c.saving ? null : true } style={{ backgroundColor: (c.saving ? 'rgba(0,0,0,0.05)' : null ) }}>

@@ -2,6 +2,7 @@ import { Actions } from "../../values/actions";
 import { Urls } from "../../values/urls";
 import { MakeDefaultHeaders } from "../../values/headers";
 import { Storage } from "../../values/storage";
+import { loadProfileInfo } from "./profileActions";
 
 export const login = (username, password, confirmPassword) => {
     return async (dispatch) => {
@@ -15,6 +16,9 @@ export const login = (username, password, confirmPassword) => {
 
             console.log('Setting localStorage to', result.token)
             localStorage.setItem(Storage.UserTokenKey, result.token)
+
+            dispatch(loadProfileInfo()) 
+
             dispatch({ type: Actions.ReceiveLogin, data: result.token })
         } catch (e) {
             dispatch({ type: Actions.WebRequestFailed, data: e, error: e.toString() })
@@ -37,4 +41,7 @@ export const register = (username, password, confirmPassword) => {
     }
 }
 
-export const logout = () => ({ type: Actions.Logout })
+export const logout = () => {
+    localStorage.removeItem(Storage.UserTokenKey);
+    return ({ type: Actions.Logout })
+}

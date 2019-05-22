@@ -23,10 +23,10 @@ class ItemPicker extends Component {
 
         const top = this.props.items.filter(i => !i.parent_id)
 
-        const expando = (item) => {
+        const expando = (item, indent = false) => {
             const children = this.props.items.filter(i => i.parent_id === item._id)
             return (
-                <div style={{ marginLeft: '16px', borderLeft: 'solid 1px rgba(0,0,0,0.05)' }} key={ item._id }>
+                <div style={ indent ? { marginLeft: '16px', borderLeft: 'solid 1px rgba(0,0,0,0.05)' } : {}} key={ item._id }>
                     <Typography variant="body2" >
                         <Button size="small" onClick={ e => this.toggleItemExpand(item) }>
                             { item.expanded ? "-" : "+" }
@@ -35,7 +35,7 @@ class ItemPicker extends Component {
                             {item.title} (+{ item.descendants })
                         </a>
                     </Typography>
-                    { item.expanded && children.map(c => expando(c)) }
+                    { item.expanded && children.map(c => expando(c, true)) }
                 </div>
             )
         }
@@ -52,7 +52,7 @@ class ItemPicker extends Component {
 
         return (
             <Fragment>
-                { top.map(expando) }
+                { top.map(e => expando(e, false)) }
                 { submitSection }
             </Fragment>
         )

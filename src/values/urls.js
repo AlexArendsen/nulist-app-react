@@ -1,7 +1,6 @@
 
 // Using relative URL, so leaving this blank
-//const baseUrl = 'https://nulist-api-node-lgrzbjukna.now.sh/api';
-const baseUrl = 'http://localhost:8080/api';
+const baseUrl = 'https://nulist-api-node-etnpweqvdw.now.sh/api';
 
 export const Urls = {
     Login: () => `${baseUrl}/login`,

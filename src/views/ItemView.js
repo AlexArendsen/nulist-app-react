@@ -94,11 +94,12 @@ class ItemView extends Component {
 export default connect((state, props) => {
     const m = (v, d = {}) => v || d;
     const itemId = m(m(props.match).params).itemId || null
-    const items = m(state.items).filter ? state.items : [];
+    const itemsLoaded = m(state.items).find
+    const children = itemsLoaded
+        ? state.items.filter(i => i.parent_id === itemId).slice().sort((a, b) => (a.index - b.index))
+        : state.items;
     return {
-        itemsLoaded: state.items !== DataStates.Unloaded,
-        profileUnloaded: state.profile === DataStates.Unloaded,
-        item: (items.filter(i => i._id === itemId) || [null])[0],
-        children: items.filter(i => i.parent_id === itemId).slice().sort((a, b) => (a.index - b.index))
+        children, itemsLoaded,
+        item: itemsLoaded ? (state.items.find(i => i._id === itemId)) || null : null,
     }
 })(withRouter(ItemView))

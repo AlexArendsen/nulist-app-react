@@ -22,7 +22,7 @@ const reducers = {
         userToken: action.data
     }),
 
-    [Actions.Logout]: (state, action) => ({ ...state, userToken: null }),
+    [Actions.Logout]: (state, action) => ({ ...state, ...defaultState }),
 
     [Actions.SendGetAllItems]: (state, actions) => ({ ...state, items: DataStates.Loading }),
     [Actions.ReceiveGetAllItems]: (state, action) => {
@@ -37,7 +37,7 @@ const reducers = {
         return { ...state, items: casted }
     },
 
-    [Actions.WebRequestFailed]: (state, action) => ({ ...state,  }),
+    [Actions.WebRequestFailed]: (state, action) => ({ ...state, login: { status: FormStates.Ready } }),
 
     [Actions.SendCheckItem]: (state, action) => updateItem(state, action.data, { saving: true }),
     [Actions.SendUncheckItem]: (state, action) => updateItem(state, action.data, { saving: true }),

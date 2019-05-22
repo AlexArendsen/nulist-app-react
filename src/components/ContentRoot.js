@@ -11,14 +11,26 @@ import OutlineView from '../views/OutlineView';
 class ContentRoot extends Component {
 
     render() {
+        const authenticatedRoutes = (
+            <Fragment>
+                <Route exact path="/" component={ItemView} />
+                <Route exact path={Routes.Items()} component={ItemView} />
+                <Route path={Routes.Item()} component={ItemView} />
+                <Route exact path={Routes.Outline()} component={OutlineView} />
+            </Fragment>
+        )
+
+        const unauthenticatedRoutes = (
+            <Fragment>
+                <Route path="/" component={LoginView} />
+            </Fragment>
+        )
+
+
         return (
             <ResponsiveGrid style={{ margin: '32px auto' }}>
                 <Router>
-                    <Route exact path="/" component={LoginView} />
-                    <Route exact path={Routes.Login()} component={LoginView} />
-                    <Route exact path={Routes.Items()} component={ItemView} />
-                    <Route path={Routes.Item()} component={ItemView} />
-                    <Route exact path={Routes.Outline()} component={OutlineView} />
+                    { (this.props.token ? authenticatedRoutes : unauthenticatedRoutes ) }
                 </Router>
             </ResponsiveGrid>
         )
@@ -26,5 +38,7 @@ class ContentRoot extends Component {
 }
 
 export default connect((state, props) => {
-    return { }
+    return {
+        token: state.userToken
+    }
 })(ContentRoot)
