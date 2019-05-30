@@ -1,5 +1,4 @@
 
-// Using relative URL, so leaving this blank
 const baseUrl = 'https://nulist-api-node-etnpweqvdw.now.sh/api';
 
 export const Urls = {

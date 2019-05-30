@@ -7,6 +7,7 @@ import { Routes } from '../values/routes';
 import TimeAgo from 'react-timeago';
 import MaterialMarkdown from './MaterialMarkdown';
 import { DataStates } from '../values/data-states';
+import ItemProgressBar from './ItemProgressBar';
 
 const abbreviatedFormatter = (value, unit, suffix) => { return value + ({
         'second': 's', 'minute': 'm', 'hour': 'h', 'day': 'd', 'week': 'w', 'month': 'mo', 'year': 'y'
@@ -25,8 +26,6 @@ class ItemList extends Component {
 
     render() {
 
-        const itemFraction = (item) => `${item.completed} / ${item.descendants}`
-        const itemCompletePercent = (item) => Math.round(item.checked ? 100 : (item.descendants ? 100*(item.completed / item.descendants) : 0 ));
         const itemDescription = (item) => ( <MaterialMarkdown source={ item.description } /> )
 
         const noItems = (text = 'No Items') => (
@@ -53,8 +52,7 @@ class ItemList extends Component {
                                         <ListItemText primary={c.title} secondary={ itemDescription(c) } style={{ maxHeight: '80px', overflowY: 'hidden', opacity: (c.saving ? 0.6 : 1) }} />
                                     </Grid>
                                     <Grid xs={ 3 } item>
-                                        <LinearProgress value={ itemCompletePercent(c) } variant={ c.saving ? 'indeterminate' : 'determinate' } style={{ height: '8px' }} />
-                                        <Typography variant="caption">{ itemFraction(c) } &middot; { itemCompletePercent(c) }%</Typography>
+                                        <ItemProgressBar item={c} />
                                     </Grid>
                                     <Grid xs={ 1 } item>
                                         <ListItemSecondaryAction>
