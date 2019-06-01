@@ -65,6 +65,15 @@ class ItemView extends Component {
             </form>
         )
 
+        const recentItems = (
+            <Fragment>
+                <Typography variant="h6" style={{ marginTop: '32px' }}>Recent Items</Typography>
+                <Paper>
+                    <ItemList items={ this.props.recentItems } onItemClick={ this.handleItemClick } />
+                </Paper>
+            </Fragment>
+        )
+
         return (
             <Fragment>
 
@@ -86,6 +95,8 @@ class ItemView extends Component {
                     <ItemList items={ this.props.children } onItemClick={ this.handleItemClick } />
                 </Paper>
 
+                { this.props.recentItems && recentItems }
+
             </Fragment>
         )
     }
@@ -100,6 +111,7 @@ export default connect((state, props) => {
         : state.items;
     return {
         children, itemsLoaded,
+        recentItems: (!itemId) ? state.recentItemIds.map(id => state.items.find(i => i._id === id)).filter(i => i && i._id) : null,
         item: itemsLoaded ? (state.items.find(i => i._id === itemId)) || null : null,
     }
 })(withRouter(ItemView))

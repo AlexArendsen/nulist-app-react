@@ -27,7 +27,7 @@ class ItemPicker extends Component {
             const children = this.props.items.filter(i => i.parent_id === item._id)
             return (
                 <div style={ indent ? { marginLeft: '16px', borderLeft: 'solid 1px rgba(0,0,0,0.05)' } : {}} key={ item._id }>
-                    <Typography variant="body2" >
+                    <Typography variant="body2" style={{ backgroundColor: (item._id === (this.state.selectedItem || {})._id) ? 'aliceblue': 'transparent' }} >
                         <Button size="small" onClick={ e => this.toggleItemExpand(item) }>
                             { item.expanded ? "-" : "+" }
                         </Button>
@@ -52,7 +52,12 @@ class ItemPicker extends Component {
 
         return (
             <Fragment>
+                <Typography variant="body1"><strong>All Items</strong></Typography>
                 { top.map(e => expando(e, false)) }
+
+                <Typography variant="body1"><strong>Recent Items</strong></Typography>
+                { this.props.recent.map(e => expando(e, false)) }
+
                 { submitSection }
             </Fragment>
         )
@@ -63,6 +68,7 @@ export default connect((state, props) => {
     const ma = (v) => ((v && v.filter) ? v : []);
     return {
         items: ma(state.items).slice().sort((a, b) => (a.index - b.index)),
+        recent: ma(state.recentItemIds).map(id => ma(state.items).find(i => i._id === id)).filter(i => i && i._id),
         onItemClick: props.onItemClick,
         onSubmit: props.onSubmit
     }

@@ -12,6 +12,7 @@ import HeaderBar from './components/HeaderBar';
 import FooterBar from './components/FooterBar';
 import { InitializeApp } from './redux/actions/initializationActions';
 import ContentRoot from './components/ContentRoot';
+import Footer from './components/Footer';
 
 export default class App extends Component {
 
@@ -28,6 +29,7 @@ export default class App extends Component {
 
                     <HeaderBar />
                     <ContentRoot />
+                    <Footer />
 
                 </Provider>
             </Fragment>

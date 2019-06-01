@@ -1,4 +1,3 @@
-
 const baseUrl = 'https://nulist-api-node-qeporztrmv.now.sh/api';
 
 export const Urls = {

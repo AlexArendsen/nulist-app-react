@@ -5,10 +5,14 @@ import { DataStates } from "../../values/data-states";
 
 const defaultState = {
     items: DataStates.Unloaded,
+    recentItemIds: [],
     selectedItem: null,
     login: { status: FormStates.Ready },
     profile: DataStates.Unloaded,
-    userToken: localStorage.getItem(Storage.UserTokenKey)
+    userToken: localStorage.getItem(Storage.UserTokenKey),
+    config: {
+        layout: {}, app: {}
+    }
 }
 
 const reducers = {
@@ -55,7 +59,7 @@ const reducers = {
     [Actions.ReceiveDeleteManyItems]: (state, action) => removeManyItems(state, action.data.deleted),
 
     [Actions.SendMoveItem]: (state, action) => updateItem(state, action.data, { saving: true }),
-    [Actions.ReceiveMoveItem]: (state, action) => updateItem(state, action.data._id, { ...action.data, saving: false }),
+    [Actions.ReceiveMoveItem]: (state, action) => updateItem({ ...state, ...pushRecentItem(state, action.data.parent_id) }, action.data._id, { ...action.data, saving: false }),
 
     [Actions.SendMoveManyItems]: (state, action) => updateManyItems(state, action.data.map(id => ({ _id: id, saving: true }))),
     [Actions.ReceiveMoveManyItems]: (state, action) => updateManyItems(state, action.data.moved.map(id => ({ _id: id, saving: false, parent_id: action.data.to }))),
@@ -71,9 +75,10 @@ const reducers = {
 
 }
 
-const updateItem = (state, id, item) => ({
-        ...state, items: withStats([ ...state.items.filter(i => i._id !== id), { ...state.items.find(i => i._id === id), ...item } ])
-    })
+const updateItem = (state, id, item) => {
+    
+    return { ...state, ...pushRecentItem(state, item._id), items: withStats([ ...state.items.filter(i => i._id !== id), { ...state.items.find(i => i._id === id), ...item } ]) }
+}
 
 const updateManyItems = (state, items) => {
         const ids = items.map(i => i._id)
@@ -82,17 +87,25 @@ const updateManyItems = (state, items) => {
         return { ...state, items: withStats([ ...unchangedItems, ...updatedItems ]) }
     }
 
-const addItem = (state, item) => ({
-        ...state, items: withStats([ ...state.items, { ...item, index: state.items.length, saving: true } ])
-    })
+const addItem = (state, item) => {
+    return { ...state, items: withStats([ ...state.items, { ...item, index: state.items.length, saving: true } ]) }
+}
 
-const removeItem = (state, item) => ({
-        ...state, items: withStats([ ...state.items.filter(i => i._id !== item._id) ])
-    })
+const removeItem = (state, item) => {
+    return { ...state, ...removeRecentItems(state, [item._id]), items: withStats([ ...state.items.filter(i => i._id !== item._id) ]) }
+}
 
-const removeManyItems = (state, itemIds) => ({
-        ...state, items: withStats([ ...state.items.filter(i => itemIds.indexOf(i._id) < 0) ])
-    })
+const removeManyItems = (state, itemIds) => {
+    return { ...state, ...removeRecentItems(state, itemIds), items: withStats([ ...state.items.filter(i => itemIds.indexOf(i._id) < 0) ]) }
+}
+
+const pushRecentItem = (state, itemId) => ({
+    recentItemIds: [ itemId, ...(state.recentItemIds || []).filter(r => r !== itemId) ]
+})
+
+const removeRecentItems = (state, itemIds) => ({
+    recentItemIds: [ ...state.recentItemIds.filter(r => itemIds.indexOf(r) < 0) ]
+})
 
 const withStats = (items = []) => {
 

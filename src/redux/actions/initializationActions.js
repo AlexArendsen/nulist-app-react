@@ -8,6 +8,9 @@ export const InitializeApp = () => {
         }
 
         dispatch({ type: Actions.SetConfig, data: {
+            app: {
+                title: 'NuList'
+            },
             layout: {
                 centerWidths: centerGridWidths,
                 gutterWidths: {
