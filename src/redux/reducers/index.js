@@ -51,8 +51,14 @@ const reducers = {
     [Actions.SendDeleteItem]: (state, action) => updateItem(state, action.data, { saving: true }),
     [Actions.ReceiveDeleteItem]: (state, action) => removeItem(state, action.data),
 
+    [Actions.SendDeleteManyItems]: (state, action) => updateManyItems(state, action.data.map(id => ({ _id: id, saving: true }))),
+    [Actions.ReceiveDeleteManyItems]: (state, action) => removeManyItems(state, action.data.deleted),
+
     [Actions.SendMoveItem]: (state, action) => updateItem(state, action.data, { saving: true }),
     [Actions.ReceiveMoveItem]: (state, action) => updateItem(state, action.data._id, { ...action.data, saving: false }),
+
+    [Actions.SendMoveManyItems]: (state, action) => updateManyItems(state, action.data.map(id => ({ _id: id, saving: true }))),
+    [Actions.ReceiveMoveManyItems]: (state, action) => updateManyItems(state, action.data.moved.map(id => ({ _id: id, saving: false, parent_id: action.data.to }))),
 
     [Actions.SendUpdateItem]: (state, action) => updateItem(state, action.data, { saving: true }),
     [Actions.ReceiveUpdateItem]: (state, action) => updateItem(state, action.data._id, { ...action.data, saving: false }),
@@ -69,12 +75,23 @@ const updateItem = (state, id, item) => ({
         ...state, items: withStats([ ...state.items.filter(i => i._id !== id), { ...state.items.find(i => i._id === id), ...item } ])
     })
 
+const updateManyItems = (state, items) => {
+        const ids = items.map(i => i._id)
+        const unchangedItems = state.items.filter(i => ids.indexOf(i._id) < 0)
+        const updatedItems = items.map(i => ({ ...state.items.find(t => t._id === i._id), ...i }))
+        return { ...state, items: withStats([ ...unchangedItems, ...updatedItems ]) }
+    }
+
 const addItem = (state, item) => ({
         ...state, items: withStats([ ...state.items, { ...item, index: state.items.length, saving: true } ])
     })
 
 const removeItem = (state, item) => ({
         ...state, items: withStats([ ...state.items.filter(i => i._id !== item._id) ])
+    })
+
+const removeManyItems = (state, itemIds) => ({
+        ...state, items: withStats([ ...state.items.filter(i => itemIds.indexOf(i._id) < 0) ])
     })
 
 const withStats = (items = []) => {

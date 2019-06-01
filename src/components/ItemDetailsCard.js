@@ -1,8 +1,25 @@
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
-import { Card, CardContent, CardActions, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, CircularProgress, Checkbox, LinearProgress, Grid } from '@material-ui/core';
-import { deleteItem, updateItem, moveItem, uncheckItem, checkItem } from '../redux/actions/itemActions';
+import {
+    Card,
+    CardContent,
+    CardActions,
+    Typography,
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField,
+    CircularProgress,
+    Checkbox,
+    LinearProgress,
+    Grid,
+    Menu,
+    MenuItem
+} from '@material-ui/core';
+import { deleteItem, updateItem, moveItem, uncheckItem, checkItem, deleteManyItems, moveManyItems } from '../redux/actions/itemActions';
 import { Routes } from '../values/routes';
 import MaterialMarkdown from './MaterialMarkdown';
 import ItemPicker from './ItemPicker';
@@ -12,12 +29,19 @@ import ItemProgressBar from './ItemProgressBar';
 
 const Modes = { Viewing: 'MODE_VIEW', Editing: 'MODE_EDIT' }
 
+const MoveVariants = { Self: 'MOVE_SELF', All: 'MOVE_ALL', Complete: 'MOVE_COMPLETE', Incomplete: 'MOVE_INCOMPLETE' }
+
+const DeleteVariants = { Self: 'DELETE_SELF', Complete: 'DELETE_COMPLETE', Incomplete: 'DELETE_INCOMPLETE' }
+
 class ItemDetailsCard extends Component {
 
     state = {
         showDeleteDialog: false,
         showMoveDialog: false,
+        additionalActionsAnchor: null,
         moveTarget: null,
+        moveVariant: MoveVariants.Self,
+        deleteVariant: DeleteVariants.Self,
         mode: Modes.Viewing,
         fields: {
             description: null,
@@ -43,18 +67,72 @@ class ItemDetailsCard extends Component {
         })
     }
 
-    openDeleteDialog = () => { this.setState({ showDeleteDialog: true }) }
+    handleAdditionalActionsOpen = (e) => { this.setState({ additionalActionsAnchor: e.currentTarget }) }
+    handleAdditionalActionsClose = () => { this.setState({ additionalActionsAnchor: null }) }
+    openMoveAllDialog = () => {
+        this.handleAdditionalActionsClose();
+        this.setState({ showMoveDialog: true, moveVariant: MoveVariants.All })
+    }
+
+    openMoveCompleteDialog = () => {
+        this.handleAdditionalActionsClose();
+        this.setState({ showMoveDialog: true, moveVariant: MoveVariants.Complete })
+    }
+
+    openMoveIncompleteDialog = () => {
+        this.handleAdditionalActionsClose();
+        this.setState({ showMoveDialog: true, moveVariant: MoveVariants.Incomplete })
+    }
+
+    openDeleteCompleteDialog = () => {
+        this.handleAdditionalActionsClose();
+        this.setState({ showDeleteDialog: true, deleteVariant: DeleteVariants.Complete })
+    }
+
+    openDeleteIncompleteDialog = () => {
+        this.handleAdditionalActionsClose();
+        this.setState({ showDeleteDialog: true, deleteVariant: DeleteVariants.Incomplete })
+    }
+
+
+    openDeleteDialog = () => { this.setState({ showDeleteDialog: true, deleteVariant: DeleteVariants.Self }) }
     onConfirmDelete = () => {
-        this.props.history.push(Routes.Item(this.props.item.parent_id));
-        this.props.dispatch(deleteItem(this.props.item._id))
+        switch (this.state.deleteVariant) {
+            case DeleteVariants.Self:
+                this.props.history.push(Routes.Item(this.props.item.parent_id));
+                this.props.dispatch(deleteItem(this.props.item._id));
+                break;
+            case DeleteVariants.Complete:
+                this.props.dispatch(deleteManyItems(this.props.children.filter(c => c.checked).map(c => c._id)))
+                break;
+            case DeleteVariants.Incomplete:
+                this.props.dispatch(deleteManyItems(this.props.children.filter(c => !c.checked).map(c => c._id)))
+                break;
+        }
         this.setState({ showDeleteDialog: false })
     }
     onCancelDelete = () => { this.setState({ showDeleteDialog: false }) }
 
-    openMoveDialog = () => { this.setState({ showMoveDialog: true }) }
+    openMoveDialog = () => { this.setState({ showMoveDialog: true, moveVariant: MoveVariants.Self }) }
     onConfirmMove = (newParent) => {
-        this.props.history.push(Routes.Item(this.props.item.parent_id));
-        this.props.dispatch(moveItem(this.props.item, newParent ? newParent._id : null))
+        const parentId = newParent ? newParent._id : null
+        switch (this.state.moveVariant) {
+            case MoveVariants.Self:
+                this.props.history.push(Routes.Item(this.props.item.parent_id));
+                this.props.dispatch(moveItem(this.props.item, parentId))
+                break;
+            case MoveVariants.All:
+                this.props.dispatch(moveManyItems(this.props.children.map(c => c._id), parentId))
+                break;
+            case MoveVariants.Complete:
+                const completeIds = this.props.children.filter(c => c.checked && c._id !== parentId).map(c => c._id)
+                this.props.dispatch(moveManyItems(completeIds, parentId))
+                break;
+            case MoveVariants.Incomplete:
+                const incompleteIds = this.props.children.filter(c => !c.checked && c._id !== parentId).map(c => c._id)
+                this.props.dispatch(moveManyItems(incompleteIds, parentId))
+                break;
+        }
         this.setState({ showMoveDialog: false })
     }
     onCancelMove = () => { this.setState({ showMoveDialog: false }) }
@@ -103,7 +181,14 @@ class ItemDetailsCard extends Component {
                     <ItemPicker onItemClick={item => this.setState({ moveTarget: item })} />
 
                     <Typography variant="body1">
-                        Move <strong>{item.title}</strong> to <strong>{this.state.moveTarget ? this.state.moveTarget.title : 'root'}</strong>?
+                        Move <strong>{
+                            ({
+                                [MoveVariants.Self]: item.title,
+                                [MoveVariants.All]: `all ${this.props.children.length} child item(s)`,
+                                [MoveVariants.Complete]: `all ${this.props.children.filter(c => c.checked).length} completed child item(s)`,
+                                [MoveVariants.Incomplete]: `all ${this.props.children.filter(c => !c.checked).length} incomplete child item(s)`
+                            }[this.state.moveVariant])
+                        }</strong> to <strong>{this.state.moveTarget ? this.state.moveTarget.title : 'root'}</strong>?
                     </Typography>
                 </DialogContent>
                 <DialogActions>
@@ -118,7 +203,15 @@ class ItemDetailsCard extends Component {
                 <DialogTitle>Confirm Delete</DialogTitle>
                 <DialogContent>
                     <Typography>
-                        You are about to delete {item.title}. This cannot be undone.
+                        You are about to delete
+                        {
+                            ({
+                                [DeleteVariants.Self]: item.title,
+                                [DeleteVariants.Complete]: `all ${this.props.children.filter(c => c.checked).length} completed child item(s)`,
+                                [DeleteVariants.Incomplete]: `all ${this.props.children.filter(c => !c.checked).length} incomplete child item(s)`
+                            }[this.state.deleteVariant])
+                        }
+                        . This cannot be undone.
                         Are you sure?
                     </Typography>
                 </DialogContent>
@@ -127,6 +220,29 @@ class ItemDetailsCard extends Component {
                     <Button onClick={this.onConfirmDelete} variant="contained" color="primary">Yes, Delete</Button>
                 </DialogActions>
             </Dialog>
+        )
+
+        const additionalActions = (
+            <div>
+                <Button
+                    aria-owns={this.state.additionalActionsAnchor ? "additional-actions-menu" : undefined}
+                    aria-haspopup="true"
+                    onClick={ this.handleAdditionalActionsOpen }>
+                    More
+                </Button>
+                <Menu
+                    id="additional-actions-menu"
+                    anchorEl={ this.state.additionalActionsAnchor }
+                    open={ !!this.state.additionalActionsAnchor }
+                    onClose={ this.handleAdditionalActionsClose }
+                >
+                    <MenuItem onClick={this.openMoveAllDialog}>Move All</MenuItem>
+                    <MenuItem onClick={this.openMoveCompleteDialog}>Move Complete</MenuItem>
+                    <MenuItem onClick={this.openMoveIncompleteDialog}>Move Incomplete</MenuItem>
+                    <MenuItem onClick={this.openDeleteCompleteDialog}>Delete Complete</MenuItem>
+                    <MenuItem onClick={this.openDeleteIncompleteDialog}>Delete Incomplete</MenuItem>
+                </Menu>
+            </div>
         )
 
         const isValidDate = (date) => !!date && typeof(date.getTime) === 'function' && !isNaN(date.getTime())
@@ -197,6 +313,7 @@ class ItemDetailsCard extends Component {
                             {this.state.mode === Modes.Editing && disablableButton('Discard', this.discard)}
                             {disablableButton('Move', this.openMoveDialog)}
                             {disablableButton('Delete', this.openDeleteDialog)}
+                            {additionalActions}
                         </CardActions>
                     </Card>
                 </form>
@@ -206,5 +323,8 @@ class ItemDetailsCard extends Component {
 }
 
 export default connect((state, props) => {
-    return { item: props.item }
+    return {
+        item: props.item,
+        children: state.items.filter(i => i.parent_id === props.item._id)
+    }
 })(withRouter(ItemDetailsCard))

@@ -77,12 +77,27 @@ export const deleteItem = (itemId) => {
     }
 }
 
+export const deleteManyItems = (itemIds) => {
+    return async (dispatch) => {
+        dispatch({ type: Actions.SendDeleteManyItems, data: itemIds })
+        await Delete(dispatch, Urls.Item.DeleteMany(), Actions.ReceiveDeleteManyItems, { ids: itemIds })
+    }
+}
+
 export const moveItem = (item, newParentId) => {
     return async (dispatch) => {
         dispatch({ type: Actions.SendMoveItem, data: item._id })
         await Put(dispatch, Urls.Item.Move(item._id), Actions.ReceiveMoveItem, { ...item, parent_id: newParentId })
     }
 }
+
+export const moveManyItems = (itemIds, newParentId) => {
+    return async (dispatch) => {
+        dispatch({ type: Actions.SendMoveManyItems, data: itemIds })
+        await Put(dispatch, Urls.Item.MoveMany(), Actions.ReceiveMoveManyItems, { ids: itemIds, new_parent: newParentId })
+    }
+}
+
 
 export const updateItem = (item) => {
     return async (dispatch) => {
