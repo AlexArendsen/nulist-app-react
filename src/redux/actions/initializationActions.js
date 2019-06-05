@@ -4,7 +4,7 @@ export const InitializeApp = () => {
     return (dispatch) => {
 
         const centerGridWidths = {
-            xs: 12, sm: 10, md: 8
+            xs: 10, sm: 10, md: 8
         }
 
         dispatch({ type: Actions.SetConfig, data: {

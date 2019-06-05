@@ -13,8 +13,6 @@ export const login = (username, password, confirmPassword) => {
             const response = await fetch(Urls.Login(), { method: 'POST', body: body, headers: MakeDefaultHeaders() })
             if (!response.ok) throw await response.text();
             const result = await response.json();
-
-            console.log('Setting localStorage to', result.token)
             localStorage.setItem(Storage.UserTokenKey, result.token)
 
             dispatch(loadProfileInfo()) 

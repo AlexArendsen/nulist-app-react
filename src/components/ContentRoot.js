@@ -27,14 +27,12 @@ class ContentRoot extends Component {
         // item default to null
         const qparams = { view: 'items', item: null, ...queryString.parse(this.props.location.search) }
 
-        const view = ({
+        const view = !this.props.token ? LoginView : ({
             items: ItemView,
             outline: OutlineView
         }[qparams.view])
 
-        return(
-            <Route exact path="/" component={view} />
-        )
+        return (<Route path="/" component={view} />)
     }
 }
 

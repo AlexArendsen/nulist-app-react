@@ -2,6 +2,7 @@ import { Actions } from "../../values/actions";
 import { FormStates } from "../../values/form-states";
 import { Storage } from "../../values/storage";
 import { DataStates } from "../../values/data-states";
+import { StaticConfigValues } from "../../values/static-config";
 
 const defaultState = {
     items: DataStates.Unloaded,
@@ -11,9 +12,7 @@ const defaultState = {
     login: { status: FormStates.Ready },
     profile: DataStates.Unloaded,
     userToken: localStorage.getItem(Storage.UserTokenKey),
-    config: {
-        layout: {}, app: {}
-    }
+    config: StaticConfigValues
 }
 
 const reducers = {
