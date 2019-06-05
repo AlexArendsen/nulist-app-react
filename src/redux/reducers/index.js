@@ -71,7 +71,9 @@ const reducers = {
     [Actions.ReceiveGetProfile]: (state, action) => ({ ...state, profile: action.data }),
 
     [Actions.ExpandItem]: (state, action) => updateItem(state, action.data._id, { expanded: true }),
-    [Actions.CollapseItem]: (state, action) => updateItem(state, action.data._id, { expanded: false })
+    [Actions.CollapseItem]: (state, action) => updateItem(state, action.data._id, { expanded: false }),
+
+    [Actions.SelectItem]: (state, action) => ({ ...state, selectedItem: action.data._id })
 
 }
 

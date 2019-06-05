@@ -6,6 +6,7 @@ import { configureStore } from './redux/store';
 import { Provider } from 'react-redux';
 import LoginView from './views/LoginView';
 import ItemView from './views/ItemView';
+import ResponsiveGrid from './components/ResponsiveGrid';
 import { Routes } from './values/routes';
 import { Grid } from '@material-ui/core';
 import HeaderBar from './components/HeaderBar';
@@ -13,6 +14,7 @@ import FooterBar from './components/FooterBar';
 import { InitializeApp } from './redux/actions/initializationActions';
 import ContentRoot from './components/ContentRoot';
 import Footer from './components/Footer';
+import { BrowserRouter as Router } from 'react-router-dom';
 
 export default class App extends Component {
 
@@ -27,9 +29,13 @@ export default class App extends Component {
             <Fragment>
                 <Provider store={this.store}>
 
-                    <HeaderBar />
-                    <ContentRoot />
-                    <Footer />
+                    <Router>
+                        <HeaderBar />
+                        <ResponsiveGrid style={{ margin: '32px auto' }}>
+                            <ContentRoot />
+                        </ResponsiveGrid>
+                        <Footer />
+                    </Router>
 
                 </Provider>
             </Fragment>

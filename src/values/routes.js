@@ -1,6 +1,6 @@
 export const Routes = {
-    Login: () => `/login`,
-    Items: () => `/items`,
-    Item: (itemId = ':itemId') => itemId === null ? `/items` : `/item/${itemId}`,
-    Outline: () => `/outline`
+    Login: () => `/`,
+    Items: () => `/?view=items`,
+    Item: (itemId = ':itemId') => itemId === null ? `/?view=items` : `/?view=items&item=${itemId}`,
+    Outline: () => `/?view=outline`
 }

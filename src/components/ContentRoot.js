@@ -4,35 +4,36 @@ import { Grid } from '@material-ui/core';
 import { Routes } from '../values/routes';
 import LoginView from '../views/LoginView';
 import ItemView from '../views/ItemView';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { Route, withRouter } from 'react-router-dom';
 import ResponsiveGrid from './ResponsiveGrid';
 import OutlineView from '../views/OutlineView';
+import queryString from 'query-string';
+import { Actions } from '../values/actions';
 
 class ContentRoot extends Component {
 
+    getQueryParams = () => ({ view: 'items', item: null, ...queryString.parse(this.props.location.search) })
+
+    updateSelectedItem = () => { this.props.dispatch({ type: Actions.SelectItem, data: { _id: this.getQueryParams().item } }) }
+
+    componentDidMount() { this.updateSelectedItem(); }
+
+    componentDidUpdate() { this.updateSelectedItem(); }
+
     render() {
-        const authenticatedRoutes = (
-            <Fragment>
-                <Route exact path="/" component={ItemView} />
-                <Route exact path={Routes.Items()} component={ItemView} />
-                <Route path={Routes.Item()} component={ItemView} />
-                <Route exact path={Routes.Outline()} component={OutlineView} />
-            </Fragment>
-        )
+        // Because netlify doesn't pass through subdirectory paths, we'll use the query string instead
+        // e.x., ?view=items&item=xxxxx...
+        // view defaults to "items"
+        // item default to null
+        const qparams = { view: 'items', item: null, ...queryString.parse(this.props.location.search) }
 
-        const unauthenticatedRoutes = (
-            <Fragment>
-                <Route path="/" component={LoginView} />
-            </Fragment>
-        )
+        const view = ({
+            items: ItemView,
+            outline: OutlineView
+        }[qparams.view])
 
-
-        return (
-            <ResponsiveGrid style={{ margin: '32px auto' }}>
-                <Router>
-                    { (this.props.token ? authenticatedRoutes : unauthenticatedRoutes ) }
-                </Router>
-            </ResponsiveGrid>
+        return(
+            <Route exact path="/" component={view} />
         )
     }
 }
@@ -41,4 +42,4 @@ export default connect((state, props) => {
     return {
         token: state.userToken
     }
-})(ContentRoot)
+})(withRouter(ContentRoot))

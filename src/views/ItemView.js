@@ -104,7 +104,7 @@ class ItemView extends Component {
 
 export default connect((state, props) => {
     const m = (v, d = {}) => v || d;
-    const itemId = m(m(props.match).params).itemId || null
+    const itemId = state.selectedItem
     const itemsLoaded = m(state.items).find
     const children = itemsLoaded
         ? state.items.filter(i => i.parent_id === itemId).slice().sort((a, b) => (a.index - b.index))
