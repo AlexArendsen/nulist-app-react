@@ -5,6 +5,7 @@ import { DataStates } from "../../values/data-states";
 
 const defaultState = {
     items: DataStates.Unloaded,
+    error: {},
     recentItemIds: [],
     selectedItem: null,
     login: { status: FormStates.Ready },
@@ -41,7 +42,11 @@ const reducers = {
         return { ...state, items: casted }
     },
 
-    [Actions.WebRequestFailed]: (state, action) => ({ ...state, login: { status: FormStates.Ready } }),
+    [Actions.WebRequestFailed]: (state, action) => ({ ...state, error: { ...state.error, major: action.data.toString() } }),
+    [Actions.ClientError]: (state, action) => ({ ...state, error: { ...state.error, minor: action.data } }),
+
+    [Actions.ClearMajorError]: (state, action) => ({ ...state, error: { ...state.error, major: undefined } }),
+    [Actions.ClearMinorError]: (state, action) => ({ ...state, error: { ...state.error, minor: undefined } }),
 
     [Actions.SendCheckItem]: (state, action) => updateItem(state, action.data, { saving: true }),
     [Actions.SendUncheckItem]: (state, action) => updateItem(state, action.data, { saving: true }),

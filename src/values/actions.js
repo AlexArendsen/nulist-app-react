@@ -15,7 +15,9 @@ export const Actions = {
     SendUncheckItem: 'SEND_UNCHECK_ITEM', ReceiveUncheckItem: 'RECV_UNCHECK_ITEM',
     SendGetProfile: 'SEND_GET_PROFILE', ReceiveGetProfile: 'RECV_GET_PROFILE',
     Logout: 'LOGOUT',
-    WebRequestFailed: 'WEB_OOPS',
+
+    WebRequestFailed: 'WEB_OOPS', ClientError: 'WOT_U_DOIN',
+    ClearMajorError: 'YA_DUN_GOOFED', ClearMinorError: 'NO_WORRIES',
 
     ExpandItem: 'ITEM_EXPAND', CollapseItem: 'ITEM_COLLAPSE',
 

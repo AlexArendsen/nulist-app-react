@@ -15,6 +15,7 @@ import { InitializeApp } from './redux/actions/initializationActions';
 import ContentRoot from './components/ContentRoot';
 import Footer from './components/Footer';
 import { BrowserRouter as Router } from 'react-router-dom';
+import ErrorContainer from './components/ErrorContainer';
 
 export default class App extends Component {
 
@@ -30,10 +31,13 @@ export default class App extends Component {
                 <Provider store={this.store}>
 
                     <Router>
-                        <HeaderBar />
-                        <ResponsiveGrid style={{ margin: '32px auto' }}>
-                            <ContentRoot />
-                        </ResponsiveGrid>
+                        <ErrorContainer />
+                        <div id="full-height">
+                            <HeaderBar />
+                            <ResponsiveGrid style={{ margin: '32px auto' }}>
+                                <ContentRoot />
+                            </ResponsiveGrid>
+                        </div>
                         <Footer />
                     </Router>
 
