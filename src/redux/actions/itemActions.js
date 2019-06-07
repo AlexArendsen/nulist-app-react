@@ -2,20 +2,6 @@ import { Actions } from "../../values/actions";
 import { Urls } from "../../values/urls";
 import { MakeDefaultHeaders } from "../../values/headers";
 
-// Sample Object
-// checked: true
-// created_at: "2019-04-24T23:20:57.289Z"
-// description: "* Need tags↵* Recommend more artists at end↵* Need to embed YouTube videos / Spotify tracks↵↵Maybe I don't want a blog, maybe I just want a place where I can recommend music. It could just be a really simple WordPress blog↵↵* Music that I already know about↵  * If you like this about this music, you'd like this other music↵* New music I've found↵* Seasonal Playlists↵* Other stuff I love↵* Other thoughts and considerations↵↵Article Ideas:↵↵* Intro article about me intentions↵* You Can Go Back↵* Sufjan Stevens, the King of Indie"
-// parent_id: "5cc0f4e4352498006b89fcb7"
-// title: "Start music blog?"
-// user_id: "5b82f656c84c100f860835fd"
-// _id: "5cc0ef59352498006b89fcb4"
-
-// Add in by app
-// saving: bool
-// descendents: number
-// completed: number
-
 const Send = async (verb, dispatch, url, successAction = undefined, body = {}, failureAction = Actions.WebRequestFailed) => {
     const options = {
         headers: MakeDefaultHeaders(),
@@ -30,7 +16,7 @@ const Send = async (verb, dispatch, url, successAction = undefined, body = {}, f
         return result
     } catch(e) {
         console.error(e)
-        dispatch({ type: failureAction, data: e, error: e + "" })
+        dispatch({ type: failureAction, data: e.toString()})
     }
 }
 
@@ -78,6 +64,7 @@ export const deleteItem = (itemId) => {
 }
 
 export const deleteManyItems = (itemIds) => {
+    if (!itemIds.length) return { type: Actions.ClientError, data: 'No items to delete' }
     return async (dispatch) => {
         dispatch({ type: Actions.SendDeleteManyItems, data: itemIds })
         await Delete(dispatch, Urls.Item.DeleteMany(), Actions.ReceiveDeleteManyItems, { ids: itemIds })
@@ -93,6 +80,8 @@ export const moveItem = (item, newParentId) => {
 }
 
 export const moveManyItems = (itemIds, newParentId) => {
+    itemIds = itemIds.filter(id => id !== newParentId)
+    if (!itemIds.length) return { type: Actions.ClientError, data: 'No items to move' }
     return async (dispatch) => {
         dispatch({ type: Actions.SendMoveManyItems, data: itemIds })
         await Put(dispatch, Urls.Item.MoveMany(), Actions.ReceiveMoveManyItems, { ids: itemIds, new_parent: newParentId })

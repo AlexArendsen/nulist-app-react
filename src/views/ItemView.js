@@ -39,9 +39,9 @@ class ItemView extends Component {
         const itemForm = (
             <form action="javascript:void(0)" style={{ width: '100%', padding: '8px 0' }}>
 
-                <Grid container spacing={ 8 }>
-                    <Grid xs={ 2 } item></Grid>
-                    <Grid xs={ 6 } item>
+                <Grid container spacing={ 0 } style={{ padding: '0 12px' }}>
+                    <Grid xs={ null } md={ 2 } item></Grid>
+                    <Grid xs={ 10 } md={ 6 } item style={{ paddingRight: '8px' }}>
                         <TextField label="Add A New Item"
                             value={ this.state.newItemName }
                             variant="outlined"
@@ -59,7 +59,7 @@ class ItemView extends Component {
                                 Add
                         </Button>
                     </Grid>
-                    <Grid xs={ 2 } item></Grid>
+                    <Grid xs={ null } md={ 2 } item></Grid>
                 </Grid>
 
             </form>
@@ -67,9 +67,9 @@ class ItemView extends Component {
 
         const recentItems = (
             <Fragment>
-                <Typography variant="h6" style={{ marginTop: '32px' }}>Recent Items</Typography>
+                <Typography variant="h6" >Recent Items</Typography>
                 <Paper>
-                    <ItemList items={ this.props.recentItems } onItemClick={ this.handleItemClick } />
+                    <ItemList items={ this.props.recentItems } onItemClick={ this.handleItemClick } enableItemQuickMenu />
                 </Paper>
             </Fragment>
         )
@@ -90,9 +90,9 @@ class ItemView extends Component {
 
                 { ( this.props.item ) ? (<ItemDetailsCard item={ this.props.item } />) : undefined }
 
-                <Paper style={{ marginTop: '32px' }}>
+                <Paper style={{ margin: '32px 0' }}>
                     { itemForm }
-                    <ItemList items={ this.props.children } onItemClick={ this.handleItemClick } />
+                    <ItemList items={ this.props.children } onItemClick={ this.handleItemClick } enableItemQuickMenu />
                 </Paper>
 
                 { this.props.recentItems && recentItems }
@@ -111,7 +111,7 @@ export default connect((state, props) => {
         : state.items;
     return {
         children, itemsLoaded,
-        recentItems: (!itemId) ? state.recentItemIds.map(id => state.items.find(i => i._id === id)).filter(i => i && i._id) : null,
+        recentItems: (!itemId) ? state.recentItemIds.map(id => state.items.find(i => i._id === id)).filter(i => i && i._id).slice(0, 10) : null,
         item: itemsLoaded ? (state.items.find(i => i._id === itemId)) || null : null,
     }
 })(withRouter(ItemView))

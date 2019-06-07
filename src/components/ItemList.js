@@ -1,8 +1,8 @@
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
-import { List, ListItem, ListItemText, ListItemSecondaryAction, Grid, Typography, Checkbox, LinearProgress } from '@material-ui/core';
-import { checkItem, uncheckItem } from '../redux/actions/itemActions';
+import { List, ListItem, ListItemText, ListItemSecondaryAction, Grid, Typography, Checkbox, LinearProgress, Menu, MenuItem } from '@material-ui/core';
+import { checkItem, uncheckItem, deleteItem } from '../redux/actions/itemActions';
 import { Routes } from '../values/routes';
 import TimeAgo from 'react-timeago';
 import MaterialMarkdown from './MaterialMarkdown';
@@ -15,6 +15,11 @@ const abbreviatedFormatter = (value, unit, suffix) => { return value + ({
 
 class ItemList extends Component {
 
+    state = {
+        rightClickedItem: null,
+        rightClickedItemAnchor: null,
+    }
+
     handleItemCheck = (e, item) => {
         this.props.dispatch(item.checked ? uncheckItem(item._id) : checkItem(item._id)) 
         e.preventDefault()
@@ -22,6 +27,22 @@ class ItemList extends Component {
 
     handleItemClick = (item) => {
         this.props.onItemClick(item);
+    }
+
+    handleItemDelete = (item) => {
+        this.setState({ rightClickedItemAnchor: null })
+        if (window.confirm(`Are you sure you want to delete ${item.title}?`))
+            this.props.dispatch(deleteItem(item._id))
+    }
+
+    handleItemRightClick = (event, item) => {
+        if (!this.props.enableItemQuickMenu) return;
+        this.setState({ rightClickedItem: item, rightClickedItemAnchor: event.currentTarget })
+        event.preventDefault()
+    }
+
+    handleContextMenuClose = () => {
+        this.setState({ rightClickedItem: null, rightClickedItemAnchor: null })
     }
 
     render() {
@@ -36,6 +57,18 @@ class ItemList extends Component {
             </div>
         )
 
+        const contextMenu = (
+            <Menu
+                id="item-context-menu"
+                anchorEl={ this.state.rightClickedItemAnchor }
+                open={ !!this.state.rightClickedItemAnchor }
+                onClose={ this.handleContextMenuClose }
+            >
+                <MenuItem disabled={true}>Move</MenuItem>
+                <MenuItem onClick={ e => this.handleItemDelete(this.state.rightClickedItem) }>Delete</MenuItem>
+            </Menu>
+        )
+
         const result = () => {
             switch (this.props.items) {
                 case DataStates.Unloaded: return null;
@@ -43,9 +76,12 @@ class ItemList extends Component {
                 default: return (!this.props.items.length) ? noItems() : (
                     <List>
                         { this.props.items.map(c => (
-                            <ListItem key={ c._id } button={ c.saving ? null : true } style={{ backgroundColor: (c.saving ? 'rgba(0,0,0,0.05)' : null ) }}>
+                            <ListItem key={ c._id }
+                                button={ c.saving ? null : true }
+                                style={{ backgroundColor: (c.saving ? 'rgba(0,0,0,0.05)' : null ) }}
+                                onContextMenu={ e => this.handleItemRightClick(e, c) }>
                                 <Grid container>
-                                    <Grid xs={ 8 } item onClick={ e => this.handleItemClick(c) }>
+                                    <Grid xs={ 8 } item onClick={ e => this.handleItemClick(c) } >
                                         <Typography variant="caption" style={{ float: 'right', paddingRight: '16px' }}>
                                             { c.created_at && <TimeAgo date={ c.created_at } formatter={ abbreviatedFormatter } /> }
                                         </Typography>
@@ -67,7 +103,12 @@ class ItemList extends Component {
             }
         }
 
-        return result()
+        return (
+            <Fragment>
+                { contextMenu }
+                { result() }
+            </Fragment>
+        )
     }
 }
 

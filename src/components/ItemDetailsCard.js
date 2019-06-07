@@ -203,10 +203,9 @@ class ItemDetailsCard extends Component {
                 <DialogTitle>Confirm Delete</DialogTitle>
                 <DialogContent>
                     <Typography>
-                        You are about to delete
-                        {
+                        You are about to delete {
                             ({
-                                [DeleteVariants.Self]: item.title,
+                                [DeleteVariants.Self]: (<Fragment><strong>{ item.title }</strong> and the <strong>{ item.descendants } items beneath it</strong></Fragment>),
                                 [DeleteVariants.Complete]: `all ${this.props.children.filter(c => c.checked).length} completed child item(s)`,
                                 [DeleteVariants.Incomplete]: `all ${this.props.children.filter(c => !c.checked).length} incomplete child item(s)`
                             }[this.state.deleteVariant])
@@ -222,6 +221,8 @@ class ItemDetailsCard extends Component {
             </Dialog>
         )
 
+        const noChildrenCompleted = !this.props.children.some(c => c.checked) || null
+        const noChildrenNotCompleted = !this.props.children.some(c => !c.checked) || null
         const additionalActions = (
             <div>
                 <Button
@@ -236,22 +237,24 @@ class ItemDetailsCard extends Component {
                     open={ !!this.state.additionalActionsAnchor }
                     onClose={ this.handleAdditionalActionsClose }
                 >
-                    <MenuItem onClick={this.openMoveAllDialog}>Move All</MenuItem>
-                    <MenuItem onClick={this.openMoveCompleteDialog}>Move Complete</MenuItem>
-                    <MenuItem onClick={this.openMoveIncompleteDialog}>Move Incomplete</MenuItem>
-                    <MenuItem onClick={this.openDeleteCompleteDialog}>Delete Complete</MenuItem>
-                    <MenuItem onClick={this.openDeleteIncompleteDialog}>Delete Incomplete</MenuItem>
+                    <MenuItem onClick={this.openMoveAllDialog} disabled={!this.props.children.length || null}>Move All</MenuItem>
+                    <MenuItem onClick={this.openMoveCompleteDialog} disabled={noChildrenCompleted}>Move Complete</MenuItem>
+                    <MenuItem onClick={this.openMoveIncompleteDialog} disabled={noChildrenNotCompleted}>Move Incomplete</MenuItem>
+                    <MenuItem onClick={this.openDeleteCompleteDialog} disabled={noChildrenCompleted}>Delete Complete</MenuItem>
+                    <MenuItem onClick={this.openDeleteIncompleteDialog} disabled={noChildrenNotCompleted}>Delete Incomplete</MenuItem>
                 </Menu>
             </div>
         )
 
         const isValidDate = (date) => !!date && typeof(date.getTime) === 'function' && !isNaN(date.getTime())
-        const createdTime = (!isValidDate(item.created_at))
+        const timeFragment = (date, prefix) => (!isValidDate(date))
             ? null : (
                 <Typography variant="caption">
-                    { format(new Date(item.created_at), 'D MMM YYYY, hh:mm:ss a') } (<TimeAgo date={ item.created_at } />)
+                    { prefix } { format(new Date(date), 'ddd D MMM YYYY, hh:mm:ss a') } (<TimeAgo date={ date } />)
                 </Typography>
             )
+        const createdTime = timeFragment(this.props.item.created_at, 'Created:')
+        const updatedTime = timeFragment(this.props.item.updated_at, 'Updated:')
 
         const editableContent = (this.state.mode == Modes.Viewing)
             ? (
@@ -301,6 +304,7 @@ class ItemDetailsCard extends Component {
                             <Grid container style={{ marginTop: '8px' }}>
                                 <Grid item xs={ 12 } md={ 6 } style={{ marginBottom: '8px' }}>
                                     { createdTime }
+                                    { updatedTime }
                                 </Grid>
                                 <Grid item xs={ 12 } md={ 6 }>
                                     <Checkbox checked={ item.checked } style={{ float: 'left', padding: '0 8px 0 0' }} onChange={ this.handleCheck } />

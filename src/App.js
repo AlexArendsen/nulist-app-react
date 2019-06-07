@@ -34,7 +34,7 @@ export default class App extends Component {
                         <ErrorContainer />
                         <div id="full-height">
                             <HeaderBar />
-                            <ResponsiveGrid style={{ margin: '32px auto' }}>
+                            <ResponsiveGrid style={{ margin: '32px 0', padding: '0 8px' }}>
                                 <ContentRoot />
                             </ResponsiveGrid>
                         </div>

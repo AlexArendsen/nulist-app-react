@@ -30,15 +30,20 @@ const reducers = {
 
     [Actions.SendGetAllItems]: (state, actions) => ({ ...state, items: DataStates.Loading }),
     [Actions.ReceiveGetAllItems]: (state, action) => {
-        const casted = withStats(action.data).map((i, idx) => ({
+        const casted = withStats(withoutOrphans(action.data)).map((i, idx) => ({
             ...i,
             index: idx,
             saving: false,
             expanded: false,
-            created_at: i.created_at ? new Date(i.created_at) : undefined
+            created_at: i.created_at ? new Date(i.created_at) : undefined,
+            updated_at: i.updated_at ? new Date(i.updated_at) : undefined
         }))
 
-        return { ...state, items: casted }
+        const mostRecentDate = (item) => item.updated_at || item.created_at
+        const recent = casted.filter(i => !!i.created_at)
+            .sort((a, b) => mostRecentDate(b) - mostRecentDate(a)).slice(0, 20).map(i => i._id)
+
+        return { ...state, items: casted, recentItemIds: recent}
     },
 
     [Actions.WebRequestFailed]: (state, action) => ({ ...state, error: { ...state.error, major: action.data.toString() } }),
@@ -151,6 +156,22 @@ const withStats = (items = []) => {
         return out
     } catch (e) { }
 
+}
+
+const withoutOrphans = (items) => {
+    const start = new Date()
+    const found = {}
+    const markAndMore = (subset) => {
+        if (!subset.length) return
+        const lookup = {}
+        subset.forEach(i => found[i._id] = lookup[i._id] = true)
+        markAndMore(items.filter(i => !!lookup[i.parent_id]))
+    }
+    markAndMore(items.filter(i => !i.parent_id))
+
+    const end = new Date()
+    console.log(`Found ${Object.keys(found).length} non-orphans (of ${items.length} total items) in ${end - start}ms`)
+    return items.filter(i => !!found[i._id])
 }
 
 export const rootReducer = (state = defaultState, action) => {
