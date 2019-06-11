@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
 import { AppBar, Toolbar, Typography, Button, Avatar, Menu, MenuItem } from '@material-ui/core';
 import ResponsiveGrid from './ResponsiveGrid';
 import { DataStates } from '../values/data-states';
@@ -32,7 +33,7 @@ class HeaderBar extends Component {
                             aria-owns={ this.state.anchorEl ? 'profile-menu' : undefined }
                             onClick={ e => this.setState({ anchorEl: e.currentTarget }) }>
                                 { this.props.profile.username }
-                                <Avatar style={{ marginLeft: '16px', width: '32px', height: '32px' }}>{ this.props.profile.username[0] }</Avatar>
+                                <Avatar style={{ marginLeft: '16px', width: '24px', height: '24px' }}>{ this.props.profile.username[0] }</Avatar>
                         </Button>
                         <Menu
                             id='profile-menu'
@@ -51,10 +52,12 @@ class HeaderBar extends Component {
                 <AppBar position="static" color="default">
                     <Toolbar>
                         <ResponsiveGrid>
-                            <div style={{ float: 'right' }}>
-                                { profileButton() }
+                            <div style={{ float: 'right' }}>{ profileButton() }</div>
+                            <div style={{ flexGrow: 1 }}>
+                                <strong style={{ marginRight: '16px' }}>NuList</strong>
+                                <Button onClick={ e => this.props.history.push(Routes.Items()) }>Items</Button>
+                                <Button onClick={ e => this.props.history.push(Routes.Outline()) }>Outline</Button>
                             </div>
-                            <Typography variant="h6" style={{ flexGrow: 1 }} >NuList</Typography>
                         </ResponsiveGrid>
                     </Toolbar>
                 </AppBar>
@@ -68,4 +71,4 @@ export default connect((state, props) => {
         profile: state.profile,
         profileUnloaded: state.profile === DataStates.Unloaded
      }
-})(HeaderBar)
+})(withRouter(HeaderBar))

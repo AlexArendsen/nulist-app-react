@@ -8,6 +8,8 @@ import TimeAgo from 'react-timeago';
 import MaterialMarkdown from './MaterialMarkdown';
 import { DataStates } from '../values/data-states';
 import ItemProgressBar from './ItemProgressBar';
+import DeleteDialog from './DeleteDialog';
+import MoveDialog from './MoveDialog';
 
 const abbreviatedFormatter = (value, unit, suffix) => { return value + ({
         'second': 's', 'minute': 'm', 'hour': 'h', 'day': 'd', 'week': 'w', 'month': 'mo', 'year': 'y'
@@ -18,6 +20,8 @@ class ItemList extends Component {
     state = {
         rightClickedItem: null,
         rightClickedItemAnchor: null,
+        showDeleteDialog: false,
+        showMoveDialog: false,
     }
 
     handleItemCheck = (e, item) => {
@@ -29,21 +33,21 @@ class ItemList extends Component {
         this.props.onItemClick(item);
     }
 
-    handleItemDelete = (item) => {
-        this.setState({ rightClickedItemAnchor: null })
-        if (window.confirm(`Are you sure you want to delete ${item.title}?`))
-            this.props.dispatch(deleteItem(item._id))
-    }
-
     handleItemRightClick = (event, item) => {
         if (!this.props.enableItemQuickMenu) return;
-        this.setState({ rightClickedItem: item, rightClickedItemAnchor: event.currentTarget })
+        this.setState({ rightClickedItem: item, rightClickedItemAnchor: event.target })
         event.preventDefault()
     }
 
     handleContextMenuClose = () => {
         this.setState({ rightClickedItem: null, rightClickedItemAnchor: null })
     }
+
+    openDeleteDialog = () => { this.setState({ showDeleteDialog: true }) }
+    openMoveDialog = () => { this.setState({ showMoveDialog: true }) }
+
+    closeDeleteDialog = () => { this.setState({ showDeleteDialog: false }) }
+    closeMoveDialog = () => { this.setState({ showMoveDialog: false }) }
 
     render() {
 
@@ -64,8 +68,8 @@ class ItemList extends Component {
                 open={ !!this.state.rightClickedItemAnchor }
                 onClose={ this.handleContextMenuClose }
             >
-                <MenuItem disabled={true}>Move</MenuItem>
-                <MenuItem onClick={ e => this.handleItemDelete(this.state.rightClickedItem) }>Delete</MenuItem>
+                <MenuItem onClick={ e => this.setState({ showMoveDialog: true, rightClickedItemAnchor: null }) }>Move</MenuItem>
+                <MenuItem onClick={ e => this.setState({ showDeleteDialog: true, rightClickedItemAnchor: null }) }>Delete</MenuItem>
             </Menu>
         )
 
@@ -105,6 +109,8 @@ class ItemList extends Component {
 
         return (
             <Fragment>
+                <DeleteDialog item={ this.state.rightClickedItem } open={ this.state.showDeleteDialog } onConfirm={ this.closeDeleteDialog } onCancel={ this.closeDeleteDialog } />
+                <MoveDialog item={ this.state.rightClickedItem } open={ this.state.showMoveDialog } onConfirm={ this.closeMoveDialog } onCancel={ this.closeMoveDialog } />
                 { contextMenu }
                 { result() }
             </Fragment>

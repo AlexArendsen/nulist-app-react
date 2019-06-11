@@ -74,6 +74,15 @@ class ItemView extends Component {
             </Fragment>
         )
 
+        const listArea = (
+            <Fragment>
+                <Paper style={{ margin: '32px 0' }}>
+                    { itemForm }
+                    <ItemList items={ this.props.children } onItemClick={ this.handleItemClick } enableItemQuickMenu />
+                </Paper>
+            </Fragment>
+        )
+
         return (
             <Fragment>
 
@@ -90,10 +99,7 @@ class ItemView extends Component {
 
                 { ( this.props.item ) ? (<ItemDetailsCard item={ this.props.item } />) : undefined }
 
-                <Paper style={{ margin: '32px 0' }}>
-                    { itemForm }
-                    <ItemList items={ this.props.children } onItemClick={ this.handleItemClick } enableItemQuickMenu />
-                </Paper>
+                { listArea }
 
                 { this.props.recentItems && recentItems }
 
