@@ -11,9 +11,9 @@ import Recaptcha from 'react-recaptcha';
 const Modes = { Login: 'M_LOGIN', Register: 'M_REGISTER' }
 
 const EmptyFields = {
-    username: 'user',
-    password: 'user',
-    confirmPassword: 'user'
+    username: '',
+    password: '',
+    confirmPassword: ''
 }
 
 class LoginView extends Component {
