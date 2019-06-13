@@ -1,4 +1,4 @@
-const baseUrl = 'https://nulist-api-node-qeporztrmv.now.sh/api';
+const baseUrl = 'https://nulist-api-node-yaaakybsof.now.sh/api';
 
 export const Urls = {
     Login: () => `${baseUrl}/login`,

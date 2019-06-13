@@ -26,6 +26,9 @@ const reducers = {
         userToken: action.data
     }),
 
+    [Actions.SendRegister]: (state, action) => state,
+    [Actions.ReceiveRegister]: (state, action) => state,
+
     [Actions.Logout]: (state, action) => ({ ...state, ...defaultState }),
 
     [Actions.SendGetAllItems]: (state, actions) => ({ ...state, items: DataStates.Loading }),

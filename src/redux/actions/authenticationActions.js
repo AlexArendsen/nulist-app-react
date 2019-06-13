@@ -18,23 +18,34 @@ export const login = (username, password, confirmPassword) => {
             dispatch(loadProfileInfo()) 
 
             dispatch({ type: Actions.ReceiveLogin, data: result.token })
+            return true;
         } catch (e) {
             dispatch({ type: Actions.WebRequestFailed, data: e, error: e.toString() })
+            return false;
         }
     }
 }
 
-export const register = (username, password, confirmPassword) => {
+export const register = (username, password, confirmPassword, recaptcha) => {
     return async (dispatch) => {
         dispatch({type: Actions.SendRegister});
-        const body = JSON.stringify({ username, password, confirmPassword })
+
+        if (!recaptcha) {
+            dispatch({ type: Actions.ClientError, data: 'Please click the robot button' })
+            return false;
+        }
+
+        const body = JSON.stringify({ username, password, confirmPassword, recaptcha })
 
         try {
-            const response = await fetch(Urls.Login(), { method: 'POST', body })
+            const response = await fetch(Urls.Register(), { method: 'POST', body, headers: MakeDefaultHeaders() })
             if (!response.ok) throw await response.text();
             const result = await response.json();
+            dispatch({ type: Actions.ReceiveRegister, data: result })
+            return true;
         } catch (e) {
             dispatch({ type: Actions.WebRequestFailed, data: e, error: e.toString() })
+            return false;
         }
     }
 }
