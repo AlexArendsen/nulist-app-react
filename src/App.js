@@ -10,7 +10,6 @@ import ResponsiveGrid from './components/ResponsiveGrid';
 import { Routes } from './values/routes';
 import { Grid } from '@material-ui/core';
 import HeaderBar from './components/HeaderBar';
-import FooterBar from './components/FooterBar';
 import { InitializeApp } from './redux/actions/initializationActions';
 import ContentRoot from './components/ContentRoot';
 import Footer from './components/Footer';

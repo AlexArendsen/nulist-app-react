@@ -17,7 +17,7 @@ class Footer extends Component {
 
         return (
             <Fragment>
-                <ResponsiveGrid style={{ backgroundColor: 'rgba(0,0,0,0.1)', padding: '32px 0' }}>
+                <ResponsiveGrid style={{ backgroundColor: 'rgba(0,0,0,0.1)', padding: '32px 16px' }}>
                     <Typography variant="h6" gutterBottom>{ this.props.config.app.title }</Typography>
                     { this.props.itemsLoading ? 'Loading...' : stats }
                 </ResponsiveGrid>

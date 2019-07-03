@@ -26,15 +26,20 @@ class MoveDialog extends Component {
     handleCancel = () => { this.props.onCancel() }
 
     render() {
+
+        const allChildren = this.props.children || [];
+        const completeChildren = allChildren.filter(i => i.checked)
+        const incompleteChildren = allChildren.filter(i => !i.checked)
+
         return !(this.props.item) ? null : (
             <ChoiceDialog
                 title='Confirm Move'
                 open={ this.props.open }
                 choices={[
                     { label: `Move ${this.props.item.title}`, value: MoveOperations.Self },
-                    { label: `Move all ${this.props.children.length} child items`, value: MoveOperations.All },
-                    { label: `Move ${this.props.children.filter(c => c.checked).length} complete child item(s)`, value: MoveOperations.AllComplete },
-                    { label: `Move ${this.props.children.filter(c => !c.checked).length} incomplete child item(s)`, value: MoveOperations.AllIncomplete },
+                    { label: `Move all ${allChildren.length} child items`, value: MoveOperations.All, disabled: !allChildren.length },
+                    { label: `Move ${completeChildren.length} complete child item(s)`, value: MoveOperations.AllComplete, disabled: !completeChildren.length },
+                    { label: `Move ${incompleteChildren.length} incomplete child item(s)`, value: MoveOperations.AllIncomplete, disabled: !incompleteChildren.length },
                 ]}
                 onCancel={ this.handleCancel }
                 onSubmit={ this.handleConfirm }

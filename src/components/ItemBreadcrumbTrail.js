@@ -15,6 +15,8 @@ class ItemBreadcrumbTrail extends Component {
 
     render() {
 
+        if (!this.props.items.filter) return null;
+
         const crumbs = []
         if (!!this.props.current) {
             let wrk = this.props.current;

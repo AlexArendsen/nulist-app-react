@@ -16,9 +16,18 @@ class SimpleRadioSelection extends Component {
         return (
             <FormControl component="fieldset">
                 { this.props.title && <FormLabel component="legend">{ this.props.title }</FormLabel> }
-                <RadioGroup onChange={ this.handleChange } value={ this.state.selection } row={ this.props.horizontal ? true : null }>
+                <RadioGroup
+                    onChange={ this.handleChange }
+                    value={ this.state.selection }
+                    row={ this.props.horizontal ? true : null }
+                >
                     { this.props.values.map(v => (
-                        <FormControlLabel key={v.value} label={ v.label } value={ v.value } control={ <Radio /> } />
+                        <FormControlLabel
+                            key={v.value}
+                            label={ v.label }
+                            value={ v.value }
+                            disabled={ v.disabled ? true : null }
+                            control={ <Radio /> } />
                     ))}
                 </RadioGroup>
             </FormControl>

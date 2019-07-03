@@ -9,12 +9,18 @@ import ResponsiveGrid from './ResponsiveGrid';
 import OutlineView from '../views/OutlineView';
 import queryString from 'query-string';
 import { Actions } from '../values/actions';
+import { FirstItemWithPropValue } from '../helpers/itemHelper';
 
 class ContentRoot extends Component {
 
     getQueryParams = () => ({ view: 'items', item: null, ...queryString.parse(this.props.location.search) })
 
-    updateSelectedItem = () => { this.props.dispatch({ type: Actions.SelectItem, data: { _id: this.getQueryParams().item } }) }
+    updateSelectedItem = () => {
+        let itemId = this.getQueryParams().item
+        if ((itemId || ' ')[0] === '@')
+            itemId = (FirstItemWithPropValue(this.props.items, 'alias', itemId) || {})._id
+        this.props.dispatch({ type: Actions.SelectItem, data: { _id: itemId } })
+    }
 
     componentDidMount() { this.updateSelectedItem(); }
 
@@ -38,6 +44,7 @@ class ContentRoot extends Component {
 
 export default connect((state, props) => {
     return {
+        items: state.items,
         token: state.userToken
     }
 })(withRouter(ContentRoot))

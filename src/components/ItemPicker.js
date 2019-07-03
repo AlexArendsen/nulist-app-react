@@ -66,9 +66,15 @@ class ItemPicker extends Component {
 
 export default connect((state, props) => {
     const ma = (v) => ((v && v.filter) ? v : []);
+    const m = (v, d = {}) => v || d;
+
+    const recentItems = ma(state.recentItemIds).map(id => ma(state.items).find(i => i._id === id)).filter(i => i && i._id);
+    const nameIsAmbiguous = (name) => recentItems.filter(i => i.title === name).length > 1;
+    const disambiguatedName = (item) => `${m(state.items.find(i => i._id == item.parent_id), { title: '(Home)' }).title} > ${item.title}`
+
     return {
         items: ma(state.items).slice().sort((a, b) => (a.index - b.index)),
-        recent: ma(state.recentItemIds).map(id => ma(state.items).find(i => i._id === id)).filter(i => i && i._id),
+        recent: recentItems.map(i => nameIsAmbiguous(i.title) ? { ...i, title: disambiguatedName(i) } : i),
         onItemClick: props.onItemClick,
         onSubmit: props.onSubmit
     }

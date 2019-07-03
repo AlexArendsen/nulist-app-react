@@ -23,14 +23,19 @@ class DeleteDialog extends Component {
     }
 
     render() {
+
+        const children = this.props.children || []
+        const completeChildren = children.filter(c => c.checked)
+        const incompleteChildren = children.filter(c => !c.checked)
+
         return !this.props.item ? null : (
             <ChoiceDialog
                 open={ this.props.open }
                 title='Confirm Delete'
                 choices={[
                     { label: `Delete ${this.props.item.title}`, value: DeleteOperations.Self },
-                    { label: `Delete ${this.props.children.filter(c => c.checked).length} complete child item(s)`, value: DeleteOperations.AllComplete },
-                    { label: `Delete ${this.props.children.filter(c => !c.checked).length} incomplete child item(s)`, value: DeleteOperations.AllIncomplete },
+                    { label: `Delete ${completeChildren.length} complete child item(s)`, value: DeleteOperations.AllComplete, disabled: !completeChildren.length },
+                    { label: `Delete ${incompleteChildren.length} incomplete child item(s)`, value: DeleteOperations.AllIncomplete, disabled: !incompleteChildren.length },
                 ]}
                 onSubmit={ this.handleConfirm }
                 onCancel={ this.handleCancel } />
