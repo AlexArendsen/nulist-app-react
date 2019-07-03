@@ -3,11 +3,20 @@ import { connect } from 'react-redux';
 import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@material-ui/core';
 
 class SimpleRadioSelection extends Component {
+
+    state = { selection: this.props.values[0].value }
+
+    handleChange = (event) => {
+        const value = event.target.value
+        this.setState({ selection: value })
+        this.props.onChange(value)
+    }
+
     render() {
         return (
             <FormControl component="fieldset">
                 { this.props.title && <FormLabel component="legend">{ this.props.title }</FormLabel> }
-                <RadioGroup onChange={ e => this.props.onChange(e.target.value) } value={ this.props.values[0].value } row={ this.props.horizontal ? true : null }>
+                <RadioGroup onChange={ this.handleChange } value={ this.state.selection } row={ this.props.horizontal ? true : null }>
                     { this.props.values.map(v => (
                         <FormControlLabel key={v.value} label={ v.label } value={ v.value } control={ <Radio /> } />
                     ))}
