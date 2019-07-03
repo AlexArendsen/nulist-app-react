@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import { List, ListItem, ListItemText, ListItemSecondaryAction, Grid, Typography, Checkbox, LinearProgress, Menu, MenuItem } from '@material-ui/core';
-import { checkItem, uncheckItem, deleteItem } from '../redux/actions/itemActions';
+import { checkItem, uncheckItem, deleteItem, moveItem } from '../redux/actions/itemActions';
 import { Routes } from '../values/routes';
 import TimeAgo from 'react-timeago';
 import MaterialMarkdown from './MaterialMarkdown';
@@ -49,6 +49,11 @@ class ItemList extends Component {
     closeDeleteDialog = () => { this.setState({ showDeleteDialog: false }) }
     closeMoveDialog = () => { this.setState({ showMoveDialog: false }) }
 
+    moveRightClickedTo = (item) => {
+        this.props.dispatch(moveItem(this.state.rightClickedItem, item._id));
+        this.setState({ rightClickedItemAnchor: null })
+    }
+
     render() {
 
         const itemDescription = (item) => ( <MaterialMarkdown source={ item.description } /> )
@@ -69,6 +74,7 @@ class ItemList extends Component {
                 onClose={ this.handleContextMenuClose }
             >
                 <MenuItem onClick={ e => this.setState({ showMoveDialog: true, rightClickedItemAnchor: null }) }>Move</MenuItem>
+                { this.props.lastItem && <MenuItem onClick={ e => this.moveRightClickedTo(this.props.lastItem) }>Move to "{ this.props.lastItem.title }"</MenuItem> }
                 <MenuItem onClick={ e => this.setState({ showDeleteDialog: true, rightClickedItemAnchor: null }) }>Delete</MenuItem>
             </Menu>
         )
@@ -121,6 +127,7 @@ class ItemList extends Component {
 export default connect((state, props) => {
     return {
         items: props.items,
+        lastItem: ((state.lastMovedId !== null && state.items.filter) ? state.items.filter(i => i._id === state.lastMovedId)[0] : null),
         onItemClick: props.onItemClick
     }
 })(withRouter(ItemList))

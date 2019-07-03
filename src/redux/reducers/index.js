@@ -8,6 +8,7 @@ const defaultState = {
     items: DataStates.Unloaded,
     error: {},
     recentItemIds: [],
+    lastMovedId: null,
     selectedItem: null,
     login: { status: FormStates.Ready },
     profile: DataStates.Unloaded,
@@ -70,7 +71,7 @@ const reducers = {
     [Actions.SendDeleteManyItems]: (state, action) => updateManyItems(state, action.data.map(id => ({ _id: id, saving: true }))),
     [Actions.ReceiveDeleteManyItems]: (state, action) => removeManyItems(state, action.data.deleted),
 
-    [Actions.SendMoveItem]: (state, action) => updateItem(state, action.data, { saving: true }),
+    [Actions.SendMoveItem]: (state, action) => ({ ...updateItem(state, action.data, { saving: true }), lastMovedId: action.newParentId }),
     [Actions.ReceiveMoveItem]: (state, action) => updateItem({ ...state, ...pushRecentItem(state, action.data.parent_id) }, action.data._id, { ...action.data, saving: false }),
 
     [Actions.SendMoveManyItems]: (state, action) => updateManyItems(state, action.data.map(id => ({ _id: id, saving: true }))),

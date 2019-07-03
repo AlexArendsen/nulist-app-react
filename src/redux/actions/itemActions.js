@@ -74,7 +74,7 @@ export const deleteManyItems = (itemIds) => {
 export const moveItem = (item, newParentId) => {
     if (item._id === newParentId) return { type: Actions.ClientError, data: 'Item cannot be a parent of itself' }
     return async (dispatch) => {
-        dispatch({ type: Actions.SendMoveItem, data: item._id })
+        dispatch({ type: Actions.SendMoveItem, data: item._id, newParentId })
         await Put(dispatch, Urls.Item.Move(item._id), Actions.ReceiveMoveItem, { ...item, parent_id: newParentId })
     }
 }
