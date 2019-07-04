@@ -10,6 +10,9 @@ import OutlineView from '../views/OutlineView';
 import queryString from 'query-string';
 import { Actions } from '../values/actions';
 import { FirstItemWithPropValue } from '../helpers/itemHelper';
+import SearchView from '../views/SearchView';
+import { DataStates } from '../values/data-states';
+import { getAllItems } from '../redux/actions/itemActions';
 
 class ContentRoot extends Component {
 
@@ -22,7 +25,11 @@ class ContentRoot extends Component {
         this.props.dispatch({ type: Actions.SelectItem, data: { _id: itemId } })
     }
 
-    componentDidMount() { this.updateSelectedItem(); }
+    componentDidMount() {
+        if (this.props.items === DataStates.Unloaded)
+            this.props.dispatch(getAllItems())
+        this.updateSelectedItem();
+    }
 
     componentDidUpdate() { this.updateSelectedItem(); }
 
@@ -35,7 +42,8 @@ class ContentRoot extends Component {
 
         const view = !this.props.token ? LoginView : ({
             items: ItemView,
-            outline: OutlineView
+            outline: OutlineView,
+            search: SearchView
         }[qparams.view])
 
         return (<Route path="/" component={view} />)

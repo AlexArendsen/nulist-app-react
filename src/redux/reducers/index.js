@@ -10,6 +10,7 @@ const defaultState = {
     recentItemIds: [],
     lastMovedId: null,
     selectedItem: null,
+    searchQuery: '',
     login: { status: FormStates.Ready },
     profile: DataStates.Unloaded,
     userToken: localStorage.getItem(Storage.UserTokenKey),
@@ -85,6 +86,8 @@ const reducers = {
 
     [Actions.ExpandItem]: (state, action) => updateItem(state, action.data._id, { expanded: true }),
     [Actions.CollapseItem]: (state, action) => updateItem(state, action.data._id, { expanded: false }),
+
+    [Actions.SearchItems]: (state, action) => ({ ...state, searchQuery: action.data }),
 
     [Actions.SelectItem]: (state, action) => ({ ...state, selectedItem: action.data._id })
 

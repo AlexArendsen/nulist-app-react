@@ -17,10 +17,6 @@ class ItemView extends Component {
 
     state = { newItemName: '' }
 
-    componentDidMount() {
-        if (!this.props.itemsLoaded) this.props.dispatch(getAllItems())
-    }
-
     handleClickUp = () => {
         this.props.history.push(this.props.item.parent_id ? Routes.Item(this.props.item.parent_id) : Routes.Items())
     }

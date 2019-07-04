@@ -113,3 +113,5 @@ export const addItem = (title, parent_id) => {
         dispatch({ type: Actions.ReceiveCreateItem, data: result, tmpId: tmpId })
     }
 }
+
+export const searchItems = (query) => ({ type: Actions.SearchItems, data: query })

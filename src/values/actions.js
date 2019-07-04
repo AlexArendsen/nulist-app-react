@@ -21,6 +21,8 @@ export const Actions = {
 
     ExpandItem: 'ITEM_EXPAND', CollapseItem: 'ITEM_COLLAPSE',
 
+    SearchItems: 'SEARCH',
+
     SelectItem: 'SELECT_ITEM',
     GoUp: 'UP'
 }

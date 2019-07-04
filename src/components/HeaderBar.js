@@ -76,6 +76,7 @@ class HeaderBar extends Component {
                                 </form>
                                 <Button onClick={ e => this.props.history.push(Routes.Items()) }>Items</Button>
                                 <Button onClick={ e => this.props.history.push(Routes.Outline()) }>Outline</Button>
+                                <Button onClick={ e => this.props.history.push(Routes.Search()) }>Search</Button>
                             </div>
                         </ResponsiveGrid>
                     </Toolbar>
