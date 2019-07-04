@@ -1,25 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
-import {
-    Card,
-    CardContent,
-    CardActions,
-    Chip,
-    Typography,
-    Button,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    TextField,
-    CircularProgress,
-    Checkbox,
-    LinearProgress,
-    Grid,
-    Menu,
-    MenuItem
-} from '@material-ui/core';
+import { Card, CardContent, CardActions, Chip, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, CircularProgress, Checkbox, LinearProgress, Grid, Menu, MenuItem, InputAdornment } from '@material-ui/core';
 import { deleteItem, updateItem, moveItem, uncheckItem, checkItem, deleteManyItems, moveManyItems } from '../redux/actions/itemActions';
 import { Routes } from '../values/routes';
 import MaterialMarkdown from './MaterialMarkdown';
@@ -31,7 +13,8 @@ import DeleteDialog from './DeleteDialog';
 import MoveDialog from './MoveDialog';
 import { MoveOperations } from '../values/move-operations';
 import { DeleteOperations } from '../values/delete-operations';
-import { GetItemProps, GetItemPropAsList } from '../helpers/itemHelper';
+import { GetItemProps, GetItemPropAsList, ItemsAreEquivalent, KeyValuePairsAsObject, ObjectAsKeyValuePairs, GetItemPropOrDefault } from '../helpers/itemHelper';
+import KeyValueEditor from './KeyValueEditor';
 
 const Modes = { Viewing: 'MODE_VIEW', Editing: 'MODE_EDIT' }
 
@@ -41,11 +24,11 @@ class ItemDetailsCard extends Component {
         showDeleteDialog: false,
         showMoveDialog: false,
         additionalActionsAnchor: null,
-        moveTarget: null,
         mode: Modes.Viewing,
         fields: {
             description: null,
-            title: null
+            title: null,
+            props: null
         },
         itemId: null
     }
@@ -62,7 +45,8 @@ class ItemDetailsCard extends Component {
             itemId: this.props.item._id,
             fields: {
                 description: this.props.item.description,
-                title: this.props.item.title
+                title: this.props.item.title,
+                props: this.props.item.props
             }
         })
     }
@@ -72,6 +56,7 @@ class ItemDetailsCard extends Component {
             const changedFields = Object.keys(this.state.fields)
                 .filter(k => this.state.fields[k] !== undefined)
                 .reduce((obj, next) => ({ ...obj, [next]: this.state.fields[next] }), {})
+
             this.props.dispatch(updateItem({ ...this.props.item, ...changedFields }))
         }
         this.setState({
@@ -85,12 +70,11 @@ class ItemDetailsCard extends Component {
         )
     }
 
+    updateField = (key, value) => { this.setState({ fields: { ...this.state.fields, [key]: value } }) }
+
     discard = () => { this.setState({ mode: Modes.Viewing }) }
 
-    changesMade = () => {
-        return (this.props.item.title !== this.state.fields.title)
-            || (this.props.item.description !== this.state.fields.description)
-    }
+    changesMade = () => ItemsAreEquivalent(this.props.item, this.state.fields)
 
     handleConfirmDelete = (e) => {
         if (e.operation === DeleteOperations.Self) this.props.history.push(Routes.Item(this.props.item.parent_id))
@@ -104,6 +88,7 @@ class ItemDetailsCard extends Component {
 
     render() {
         const item = this.props.item;
+        const editing = this.state.model === Modes.Viewing;
 
         const disablableButton = (title, onClick = (() => { }), isPrimary = false) => (
             <Button
@@ -125,31 +110,41 @@ class ItemDetailsCard extends Component {
         const createdTime = timeFragment(this.props.item.created_at, 'Created:')
         const updatedTime = timeFragment(this.props.item.updated_at, 'Updated:')
 
+        const propEditor = <KeyValueEditor
+                data={ this.state.fields.props }
+                onChange={ newObj => this.updateField('props', newObj) } />
+
+        const tagChip = (label, index) => <Chip key={ index } label={ label } style={{ marginRight: '8px' }} variant="outlined" />
+
         const editableContent = (this.state.mode == Modes.Viewing)
             ? (
                 <Fragment>
                     <Typography variant="h5" gutterBottom>
                         {item.title}
+                        { item.props['alias'] && (<small style={{ marginLeft: '8px' }}>{ item.props['alias'] }</small>) }
                     </Typography>
-                    { this.props.tags.length ? this.props.tags.map((t, i) => (<Chip key={ i } label={ t } variant="outlined" style={{ marginRight: '4px' }} />)) : null }
+                    { (item.props['tags'] || '').split(',').filter(s => !!s).map(tagChip) }
                     <MaterialMarkdown source={item.description} />
                 </Fragment>
             ) : (
                 <Fragment>
-                    <TextField onChange={ e => this.setState({ fields: { ...this.state.fields, title: e.target.value } }) }
+                    <TextField
+                        onChange={ e => this.updateField('title', e.target.value) }
                         defaultValue={ item.title }
                         label="Title"
                         variant="outlined"
                         style={{ marginBottom: '16px' }}
                         fullWidth />
                     <TextField
-                        onChange={e => this.setState({ fields: { ...this.state.fields, description: e.target.value } })}
+                        onChange={ e => this.updateField('description', e.target.value) }
                         defaultValue={item.description}
                         label="Description"
                         variant="outlined"
                         rows="12"
+                        style={{ marginBottom: '16px' }}
                         fullWidth
                         multiline />
+                    { propEditor }
                 </Fragment>
             )
 
@@ -212,8 +207,7 @@ export default connect((state, props) => {
     const m = (v, d = {}) => v || d;
 
     return {
-        item: props.item,
-        tags: GetItemPropAsList(props.item, 'tags'),
+        item: { props: {}, ...props.item},
         children: state.items.filter(i => i.parent_id === props.item._id)
     }
 })(withRouter(ItemDetailsCard))

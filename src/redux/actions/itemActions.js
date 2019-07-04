@@ -103,17 +103,9 @@ export const addItem = (title, parent_id) => {
 
         const tags = title.split(' ')
             .filter(word => word.length > 1 && word[0] === '#')
-            .map(tag => tag.substring(1))
-            .join(', ');
+            .map(tag => tag.substring(1)).join(', ')
 
-        
-        const description = !!tags ? `- tags: ${ tags }` : undefined;
-
-        const realTitle = title.split(' ')
-            .filter(word => word.length && word[0] !== '#')
-            .join(' ')
-
-        const newItem = { title: realTitle, description, parent_id, _id: tmpId }
+        const newItem = { title, props: { tags }, parent_id, _id: tmpId }
 
         dispatch({ type: Actions.SendCreateItem, data: newItem })
         const result = await Post(dispatch, Urls.Item.Create(), undefined, newItem)

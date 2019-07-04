@@ -1,15 +1,28 @@
 const m = (v, d = {}) => v || d;
 
-export const ItemHasProps = (item) => m(m(item).description, ' ')[0] === '-'
+export const ItemHasProps = (item) => {
+    console.error('ItemHasProps is deprecated! Use item.props');
+    return !!item.props
+}
 
-export const GetItemProps = (item) => m(m(item).description, '').split('\n')
-    .filter(line => m(line, ' ')[0] === '-')
-    .map(line => line.replace(/^-\s+/, '').split(':').map(op => op.trim()))
-    .reduce((props, next) => ({ ...props, [next[0]]: next[1] }), {})
+export const GetItemProps = (item) => {
+    console.error('GetItemProps is deprecated! Use item.props');
+    return item.props
+}
 
-export const GetItemPropOrDefault = (item, prop, defaultValue = '') => m(GetItemProps(item), {})[prop] || defaultValue
+export const GetItemPropOrDefault = (item, prop, defaultValue = '') => m(m(item).props)[prop] || defaultValue
 
 export const GetItemPropAsList = (item, prop) => GetItemPropOrDefault(item, prop).split(',').map(s => s.trim()).filter(s => !!s)
 
 export const FirstItemWithPropValue = (allItems, prop, value) =>
-    allItems.filter ? allItems.filter(ItemHasProps).find(i => GetItemProps(i)[prop] === value) : null
+    allItems.filter ? allItems.filter(i => !!i.props).find(i => GetItemPropOrDefault(i, prop) === value) : null
+
+export const ItemsAreEquivalent = (item1, item2) => {
+    const [ keys1, keys2 ] = [ item1, item2 ].map(m).map(i => m(i.props)).map(Object.keys)
+    if (keys1.some(k => keys2.indexOf(k) === -1 || keys2[k] !== keys1[k])) return false
+    return ['title', 'description'].every(field => item1[field] === item2[field])
+}
+
+export const ObjectAsKeyValuePairs = (obj) => Object.keys(m(obj)).map(key => ({ key, value: obj[key] }))
+
+export const KeyValuePairsAsObject = (pairs) => m(pairs || []).reduce((obj, next) => ({ ...obj, [next.key]: next.value }), {})
