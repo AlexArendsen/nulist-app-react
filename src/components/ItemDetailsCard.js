@@ -5,6 +5,7 @@ import {
     Card,
     CardContent,
     CardActions,
+    Chip,
     Typography,
     Button,
     Dialog,
@@ -30,6 +31,7 @@ import DeleteDialog from './DeleteDialog';
 import MoveDialog from './MoveDialog';
 import { MoveOperations } from '../values/move-operations';
 import { DeleteOperations } from '../values/delete-operations';
+import { GetItemProps, GetItemPropAsList } from '../helpers/itemHelper';
 
 const Modes = { Viewing: 'MODE_VIEW', Editing: 'MODE_EDIT' }
 
@@ -126,7 +128,10 @@ class ItemDetailsCard extends Component {
         const editableContent = (this.state.mode == Modes.Viewing)
             ? (
                 <Fragment>
-                    <Typography variant="h5" gutterBottom>{item.title}</Typography>
+                    <Typography variant="h5" gutterBottom>
+                        {item.title}
+                    </Typography>
+                    { this.props.tags.length ? this.props.tags.map((t, i) => (<Chip key={ i } label={ t } variant="outlined" style={{ marginRight: '4px' }} />)) : null }
                     <MaterialMarkdown source={item.description} />
                 </Fragment>
             ) : (
@@ -203,8 +208,12 @@ class ItemDetailsCard extends Component {
 }
 
 export default connect((state, props) => {
+
+    const m = (v, d = {}) => v || d;
+
     return {
         item: props.item,
+        tags: GetItemPropAsList(props.item, 'tags'),
         children: state.items.filter(i => i.parent_id === props.item._id)
     }
 })(withRouter(ItemDetailsCard))
