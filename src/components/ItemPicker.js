@@ -1,11 +1,15 @@
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
-import { Typography, Button, Grid } from '@material-ui/core';
+import { Typography, Button, Grid, Tabs, Tab } from '@material-ui/core';
 import { Actions } from '../values/actions';
+import { ReverseChronological } from '../helpers/itemHelper';
 
 class ItemPicker extends Component {
 
-    state = { selectedItem: null }
+    state = {
+        selectedItem: null,
+        selectedTab: 0
+    }
 
     toggleItemExpand = (item) => { this.props.dispatch({ type: item.expanded ? Actions.CollapseItem : Actions.ExpandItem, data: item }) }
 
@@ -50,13 +54,30 @@ class ItemPicker extends Component {
              </div>
          )
 
+        const AllItems = (<Fragment>{ top.map(e => expando(e, false)) }</Fragment>)
+        const RecentItems = (<Fragment>{ this.props.recent.map(e => expando(e, false)) }</Fragment>)
+        const AliasedItems = this.props.aliased.length
+            ? (<Fragment>{ this.props.aliased.map(e => expando(e, false)) }</Fragment>)
+            : (<Fragment>
+                <Typography variant="h6">No Aliased Items</Typography>
+                <Typography variant="body1">
+                    Looks like you haven't aliased any items yet! To do so, add a property
+                    called <strong>alias</strong> to an item of your choosing, and give
+                    it a value that begins with an <strong>@</strong>. Save the item,
+                    and it'll show up here!
+                </Typography>
+            </Fragment>);
+
         return (
             <Fragment>
-                <Typography variant="body1"><strong>All Items</strong></Typography>
-                { top.map(e => expando(e, false)) }
 
-                <Typography variant="body1"><strong>Recent Items</strong></Typography>
-                { this.props.recent.map(e => expando(e, false)) }
+                <Tabs value={ this.state.selectedTab } onChange={ (e, val) => this.setState({ ...this.state, selectedTab: val }) }>
+                    <Tab label="All" />
+                    <Tab label="Recent" />
+                    <Tab label="Aliases" />
+                </Tabs>
+
+                { [AllItems, RecentItems, AliasedItems][this.state.selectedTab] }
 
                 { submitSection }
             </Fragment>
@@ -69,12 +90,15 @@ export default connect((state, props) => {
     const m = (v, d = {}) => v || d;
 
     const recentItems = ma(state.recentItemIds).map(id => ma(state.items).find(i => i._id === id)).filter(i => i && i._id);
-    const nameIsAmbiguous = (name) => recentItems.filter(i => i.title === name).length > 1;
+    const nameIsAmbiguous = (collection, name) => collection.filter(i => i.title === name).length > 1;
     const disambiguatedName = (item) => `${m(state.items.find(i => i._id == item.parent_id), { title: '(Home)' }).title} > ${item.title}`
+    const withDisambiguatedNames = (items) => items.map(i => nameIsAmbiguous(items, i.title) ? { ...i, title: disambiguatedName(i) } : i)
+    const withAliasedNames = (items) => items.map(i => m(i.props).alias ? { ...i, title: `${i.props.alias} (${i.title})` } : i)
 
     return {
         items: ma(state.items).slice().sort((a, b) => (a.index - b.index)),
-        recent: recentItems.map(i => nameIsAmbiguous(i.title) ? { ...i, title: disambiguatedName(i) } : i),
+        recent: withDisambiguatedNames(recentItems),
+        aliased: withAliasedNames(withDisambiguatedNames(ReverseChronological(ma(state.items).filter(i => !!m(i.props).alias)).slice(0, 25))),
         onItemClick: props.onItemClick,
         onSubmit: props.onSubmit
     }

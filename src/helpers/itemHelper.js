@@ -23,6 +23,11 @@ export const ItemsAreEquivalent = (item1, item2) => {
     return ['title', 'description'].every(field => item1[field] === item2[field])
 }
 
+export const ReverseChronological = (items) => {
+    const latestDate = (i) => !!m(i.updated_at, {}).getTime ? i.updated_at : i.created_at
+    return items.sort((a, b) => latestDate(b) - latestDate(a))
+}
+
 export const ObjectAsKeyValuePairs = (obj) => Object.keys(m(obj)).map(key => ({ key, value: obj[key] }))
 
 export const KeyValuePairsAsObject = (pairs) => m(pairs || []).reduce((obj, next) => ({ ...obj, [next.key]: next.value }), {})
