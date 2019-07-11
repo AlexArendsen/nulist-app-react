@@ -13,6 +13,21 @@ import ItemList from '../components/ItemList';
 import ItemDetailsCard from '../components/ItemDetailsCard';
 import { loadProfileInfo } from '../redux/actions/profileActions';
 
+const ParseSorters = (sort = '') => {
+    const terms = sort.split(',').map(c => c.trim().split(' '))
+    if (!terms.length) return (a, b) => a.index - b.index
+    const makeComparer = (selector, inverted) => ((a, b) => {
+        if (inverted) { let s = a; a = b; b = s; } 
+        if (selector(a) < selector(b)) return -1;
+        if (selector(a) > selector(b)) return 1;
+        return 0;
+    })
+    return terms
+        .map(t => (t[0][0] === '!') ? ((i) => i.props[t.slice(1)]) : ((i) => i[t[0]]))
+        .map((selector, idx) => makeComparer(selector, terms[idx][1] === 'desc'))
+        .reverse()
+}
+
 class ItemView extends Component {
 
     state = { newItemName: '' }
@@ -63,7 +78,7 @@ class ItemView extends Component {
 
         const recentItems = (
             <Fragment>
-                <Typography variant="h6" >Recent Items</Typography>
+                <Typography variant="h6">Recent Items</Typography>
                 <Paper>
                     <ItemList items={ this.props.recentItems } onItemClick={ this.handleItemClick } enableItemQuickMenu />
                 </Paper>
@@ -74,7 +89,10 @@ class ItemView extends Component {
             <Fragment>
                 <Paper style={{ margin: '32px 0' }}>
                     { itemForm }
-                    <ItemList items={ this.props.children } onItemClick={ this.handleItemClick } enableItemQuickMenu />
+                    <ItemList
+                        items={ this.props.children }
+                        onItemClick={ this.handleItemClick }
+                        enableItemQuickMenu />
                 </Paper>
             </Fragment>
         )
@@ -106,14 +124,21 @@ class ItemView extends Component {
 
 export default connect((state, props) => {
     const m = (v, d = {}) => v || d;
+
     const itemId = state.selectedItem
     const itemsLoaded = m(state.items).find
+    const item = itemsLoaded ? (state.items.find(i => i._id === itemId)) || null : null
+
+    const sorters = ParseSorters(m(m(m(item).props).sort, ''))
+    const multisort = (sorts, items) => sorts.reduce((agg, nextSort) => agg.sort(nextSort), items)
+
     const children = itemsLoaded
-        ? state.items.filter(i => i.parent_id === itemId).slice().sort((a, b) => (a.index - b.index))
+        ? multisort(sorters, state.items.filter(i => i.parent_id === itemId).slice())
         : state.items;
+
     return {
         children, itemsLoaded,
         recentItems: (!itemId) ? state.recentItemIds.map(id => state.items.find(i => i._id === id)).filter(i => i && i._id).slice(0, 10) : null,
-        item: itemsLoaded ? (state.items.find(i => i._id === itemId)) || null : null,
+        item: item
     }
 })(withRouter(ItemView))
