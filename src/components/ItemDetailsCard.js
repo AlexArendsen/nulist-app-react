@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import { Card, CardContent, CardActions, Chip, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, CircularProgress, Checkbox, LinearProgress, Grid, Menu, MenuItem, InputAdornment } from '@material-ui/core';
-import { deleteItem, updateItem, moveItem, uncheckItem, checkItem, deleteManyItems, moveManyItems } from '../redux/actions/itemActions';
+import { deleteItem, updateItem, moveItem, uncheckItem, checkItem, deleteManyItems, moveManyItems, searchItems } from '../redux/actions/itemActions';
 import { Routes } from '../values/routes';
 import MaterialMarkdown from './MaterialMarkdown';
 import ItemPicker from './ItemPicker';
@@ -86,6 +86,12 @@ class ItemDetailsCard extends Component {
         this.setState({ showMoveDialog: false })
     }
 
+    handleTagClick = (query) => {
+        if (query[0] !== '#') query = `#${query.trim()}`
+        this.props.dispatch(searchItems(query))
+        this.props.history.push(Routes.Search())
+    }
+
     render() {
         const item = this.props.item;
         const editing = this.state.model === Modes.Viewing;
@@ -114,7 +120,12 @@ class ItemDetailsCard extends Component {
                 data={ this.state.fields.props }
                 onChange={ newObj => this.updateField('props', newObj) } />
 
-        const tagChip = (label, index) => <Chip key={ index } label={ label } style={{ marginRight: '8px' }} variant="outlined" />
+        const tagChip = (label, index) => <Chip
+            key={ index }
+            label={ label }
+            style={{ marginRight: '8px' }}
+            onClick={ e => this.handleTagClick(label) }
+            variant="outlined" />
 
         const editableContent = (this.state.mode == Modes.Viewing)
             ? (

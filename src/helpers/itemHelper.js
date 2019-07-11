@@ -24,7 +24,7 @@ export const ItemsAreEquivalent = (item1, item2) => {
 }
 
 export const ReverseChronological = (items) => {
-    const latestDate = (i) => !!m(i.updated_at, {}).getTime ? i.updated_at : i.created_at
+    const latestDate = (i) => (!!m(i.updated_at, {}).getTime ? i.updated_at : i.created_at) || -Infinity
     return items.sort((a, b) => latestDate(b) - latestDate(a))
 }
 

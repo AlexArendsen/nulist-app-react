@@ -5,6 +5,7 @@ import { withRouter } from 'react-router';
 import ItemList from '../components/ItemList';
 import { Routes } from '../values/routes';
 import { searchItems } from '../redux/actions/itemActions';
+import { ReverseChronological } from '../helpers/itemHelper';
 
 const TokenTypes = {
     Tag: 'TAG',
@@ -61,19 +62,15 @@ class SearchView extends Component {
     render() {
         return (
             <Fragment>
-                <form action="javascript:;" onSubmit={ this.handleSearch }>
-                    <TextField onChange={ e => this.setState({ query: e.target.value }) } />
-                    <Button onClick={ this.handleSearch }>Search</Button>
-                </form>
 
                 <Typography>
-                    Showing { this.props.results.length } of { this.props.resultCount } results.
+                    Showing { this.props.results.length } of { this.props.resultCount } results for "{ this.props.searchQuery }", most recent first.
                 </Typography>
 
                 <Paper>
                     <ItemList
                         enableItemQuickMenu
-                        items={ this.props.results.slice(0, 50) }
+                        items={ this.props.results }
                         onItemClick={ i => this.props.history.push(Routes.Item(i._id)) } />
                 </Paper>
             </Fragment>
@@ -83,9 +80,10 @@ class SearchView extends Component {
 
 export default connect((state, props) => {
     const predicates = parseQuery(state.searchQuery || '')
-    const matches = (state.items.filter && predicates.length) ? state.items.filter(i => itemMatchesPredicates(i, predicates)) : []
+    const matches = (state.items.filter && predicates.length)
+        ? state.items.filter(i => itemMatchesPredicates(i, predicates)) : []
     return {
-        results: matches.slice(0, 25),
+        results: ReverseChronological(matches).slice(0, 25),
         resultCount: matches.length,
         searchQuery: state.searchQuery
     }
