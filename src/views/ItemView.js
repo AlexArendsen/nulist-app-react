@@ -129,12 +129,14 @@ export default connect((state, props) => {
     const itemsLoaded = m(state.items).find
     const item = itemsLoaded ? (state.items.find(i => i._id === itemId)) || null : null
 
-    const sorters = ParseSorters(m(m(m(item).props).sort, ''))
+    const sortQuery = m(m(m(item).props).sort, '')
+    const sorters = ParseSorters(sortQuery)
+    console.log('Sorters created:', sorters)
     const multisort = (sorts, items) => sorts.reduce((agg, nextSort) => agg.sort(nextSort), items)
+    const unsortedChildren = itemsLoaded ? state.items.filter(i => i.parent_id === itemId).slice() : []
 
-    const children = itemsLoaded
-        ? multisort(sorters, state.items.filter(i => i.parent_id === itemId).slice())
-        : state.items;
+    const children = sortQuery
+        ? multisort(sorters, unsortedChildren) : unsortedChildren.sort((a, b) => a.index - b.index)
 
     return {
         children, itemsLoaded,
