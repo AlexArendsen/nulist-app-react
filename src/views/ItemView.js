@@ -12,6 +12,8 @@ import ItemBreadcrumbTrail from '../components/ItemBreadcrumbTrail';
 import ItemList from '../components/ItemList';
 import ItemDetailsCard from '../components/ItemDetailsCard';
 import { loadProfileInfo } from '../redux/actions/profileActions';
+import { GetItemPropOrDefault } from '../helpers/itemHelper';
+import ItemGroup from '../components/ItemGroup';
 
 const ParseSorters = (sort = '') => {
     const terms = sort.split(',').map(c => c.trim().split(' '))
@@ -85,17 +87,42 @@ class ItemView extends Component {
             </Fragment>
         )
 
-        const listArea = (
-            <Fragment>
-                <Paper style={{ margin: '32px 0' }}>
-                    { itemForm }
-                    <ItemList
-                        items={ this.props.children }
-                        onItemClick={ this.handleItemClick }
-                        enableItemQuickMenu />
-                </Paper>
-            </Fragment>
-        )
+        const makeListArea = () => {
+            const displayProp = GetItemPropOrDefault(this.props.item, 'display', 'list')
+
+            if (displayProp === 'collection') {
+                const leaves = this.props.children.filter(c => !c.descendants)
+                const nodes = this.props.children.filter(c => !!c.descendants)
+                const LeafSection = () =>(
+                    <Fragment>
+                        <Typography variant="h6" style={{ marginTop: '24px' }}>Top-Level Items</Typography>
+                        <Paper><ItemList items={ leaves } onItemClick={ this.handleItemClick } enableItemQuickMenu /></Paper>
+                    </Fragment>
+                )
+
+                return (
+                    <Fragment>
+
+                        { itemForm }
+                        { nodes.map(n => (<ItemGroup key={ n.index } item={ n } onItemClick={ this.handleItemClick } sortItems={ this.props.sortItems } />)) }
+                        { !!leaves.length && <LeafSection /> }
+
+                    </Fragment>
+                )
+            }
+
+            return (
+                <Fragment>
+                    <Paper style={{ margin: '32px 0' }}>
+                        { itemForm }
+                        <ItemList
+                            items={ this.props.children }
+                            onItemClick={ this.handleItemClick }
+                            enableItemQuickMenu />
+                    </Paper>
+                </Fragment>
+            )
+        }
 
         return (
             <Fragment>
@@ -113,7 +140,7 @@ class ItemView extends Component {
 
                 { ( this.props.item ) ? (<ItemDetailsCard item={ this.props.item } />) : undefined }
 
-                { listArea }
+                { makeListArea() }
 
                 { this.props.recentItems && recentItems }
 
@@ -131,16 +158,17 @@ export default connect((state, props) => {
 
     const sortQuery = m(m(m(item).props).sort, '')
     const sorters = ParseSorters(sortQuery)
-    console.log('Sorters created:', sorters)
     const multisort = (sorts, items) => sorts.reduce((agg, nextSort) => agg.sort(nextSort), items)
+    const doMultisort = (items) => multisort(sorters, items)
     const unsortedChildren = itemsLoaded ? state.items.filter(i => i.parent_id === itemId).slice() : []
 
     const children = sortQuery
-        ? multisort(sorters, unsortedChildren) : unsortedChildren.sort((a, b) => a.index - b.index)
+        ? doMultisort(unsortedChildren) : unsortedChildren.sort((a, b) => a.index - b.index)
 
     return {
         children, itemsLoaded,
         recentItems: (!itemId) ? state.recentItemIds.map(id => state.items.find(i => i._id === id)).filter(i => i && i._id).slice(0, 10) : null,
-        item: item
+        item: item,
+        sortItems: doMultisort
     }
 })(withRouter(ItemView))
